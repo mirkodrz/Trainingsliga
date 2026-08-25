@@ -1,0 +1,1666 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Trainingsliga FCSP</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Source+Sans+3:wght@300;400;600;700&display=swap">
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+
+<style>
+*,*::before,*::after{box-sizing:border-box}
+
+:root{
+  --bg:#FAF7F3;--bg-alt:#EEEAE2;--card:#FFFFFF;--border:#DDD3C6;
+  --text:#2B1810;--text-2:#7A6B5E;--text-3:#A89888;
+  --primary:#6B3A2A;--primary-h:#5A2E1F;--primary-l:#A67358;--primary-s:#F5EDE5;
+  --green:#2D8F4E;--green-s:#E3F2E8;--red:#C94040;--red-s:#FDEAEA;
+  --gold:#B8880A;--gold-s:#FFF8E1;--silver:#8A8A8A;--bronze:#B0886A;
+  --radius:10px;--radius-s:6px;
+  --shadow:0 1px 3px rgba(43,24,16,.08);
+  --shadow-m:0 2px 8px rgba(43,24,16,.10);
+  --font-d:'Oswald',sans-serif;--font-b:'Source Sans 3',-apple-system,sans-serif;
+}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#141210;--bg-alt:#1E1A16;--card:#262018;--border:#3D3428;
+  --text:#F0E8E0;--text-2:#A09488;--text-3:#706458;
+  --primary:#C4896E;--primary-h:#D49A80;--primary-l:#A67358;--primary-s:#2E2218;
+  --green:#4ACD73;--green-s:#172E1E;--red:#EF6B6B;--red-s:#2E1818;
+  --gold:#F0C040;--gold-s:#2E2810;
+  --shadow:0 1px 3px rgba(0,0,0,.3);--shadow-m:0 2px 8px rgba(0,0,0,.35);
+}}
+:root[data-theme="dark"]{
+  --bg:#141210;--bg-alt:#1E1A16;--card:#262018;--border:#3D3428;
+  --text:#F0E8E0;--text-2:#A09488;--text-3:#706458;
+  --primary:#C4896E;--primary-h:#D49A80;--primary-l:#A67358;--primary-s:#2E2218;
+  --green:#4ACD73;--green-s:#172E1E;--red:#EF6B6B;--red-s:#2E1818;
+  --gold:#F0C040;--gold-s:#2E2810;
+  --shadow:0 1px 3px rgba(0,0,0,.3);--shadow-m:0 2px 8px rgba(0,0,0,.35);
+}
+
+body{background:var(--bg);color:var(--text);font-family:var(--font-b);margin:0;padding:0;
+  -webkit-font-smoothing:antialiased;font-size:15px;line-height:1.5;min-height:100vh}
+
+#app{max-width:520px;margin:0 auto;padding-bottom:80px;min-height:100vh}
+
+/* ── Header ── */
+.hdr-wrap{position:sticky;top:0;z-index:100}
+.hdr{background:linear-gradient(135deg,var(--primary),var(--primary-h));color:#fff;
+  padding:18px 16px 14px}
+.hdr-title{font-family:var(--font-d);font-size:1.35rem;font-weight:700;letter-spacing:.04em;
+  text-transform:uppercase;line-height:1.15}
+.hdr-sub{display:flex;justify-content:space-between;align-items:center;margin-top:2px}
+.hdr-team{font-family:var(--font-d);font-size:.9rem;font-weight:500;opacity:.85;letter-spacing:.03em}
+.hdr-kw{font-family:var(--font-d);font-size:.85rem;font-weight:400;opacity:.7}
+.hdr-back{background:none;border:none;color:#fff;padding:4px 8px 4px 0;cursor:pointer;display:flex;align-items:center;gap:4px;
+  font-family:var(--font-b);font-size:.9rem;opacity:.85}
+.hdr-back:hover{opacity:1}
+.hdr-back svg{width:20px;height:20px}
+.hdr-row{display:flex;justify-content:space-between;align-items:center}
+
+/* ── Theme Banner ── */
+.theme-banner{background:var(--gold-s);border-left:3px solid var(--gold);padding:10px 14px;
+  margin:0;font-size:.85rem;display:flex;align-items:center;gap:8px}
+.theme-label{font-family:var(--font-d);font-weight:600;text-transform:uppercase;font-size:.7rem;
+  letter-spacing:.06em;color:var(--gold)}
+.theme-value{font-weight:600;color:var(--text)}
+
+/* ── Tabs ── */
+.tab-bar{display:flex;gap:0;background:var(--card);border-bottom:1px solid var(--border)}
+.tab-btn{flex:1;padding:10px 4px;background:none;border:none;border-bottom:2px solid transparent;
+  font-family:var(--font-d);font-size:.72rem;font-weight:500;letter-spacing:.03em;text-transform:uppercase;
+  color:var(--text-2);cursor:pointer;transition:all .2s;white-space:nowrap}
+.tab-btn:hover{color:var(--text)}
+.tab-btn.active{color:var(--primary);border-bottom-color:var(--primary)}
+
+/* ── Sort Controls ── */
+.sort-bar{display:flex;gap:6px;padding:10px 14px;background:var(--bg)}
+.sort-btn{padding:5px 12px;border-radius:20px;border:1px solid var(--border);background:var(--card);
+  font-size:.75rem;font-weight:600;color:var(--text-2);cursor:pointer;transition:all .15s;font-family:var(--font-b)}
+.sort-btn.active{background:var(--primary);color:#fff;border-color:var(--primary)}
+
+/* ── League Table ── */
+.league-table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
+.league-table th{font-family:var(--font-d);text-transform:uppercase;font-size:.7rem;letter-spacing:.06em;
+  color:var(--text-3);padding:8px 8px;text-align:left;border-bottom:2px solid var(--primary)}
+.league-table td{padding:11px 8px;border-bottom:1px solid var(--border);font-size:.9rem}
+.league-table tbody tr{cursor:pointer}
+.league-table tbody tr:active{opacity:.7}
+.league-table tbody tr:nth-child(odd){background:var(--card)}
+.league-table tbody tr:nth-child(even){background:var(--bg-alt)}
+.col-rank{width:32px;text-align:center;font-family:var(--font-d);font-weight:600;color:var(--text-2)}
+.col-name{font-weight:600}
+.col-pts{width:48px;text-align:center;font-family:var(--font-d);font-weight:700;font-size:1rem}
+.col-chg{width:56px;text-align:right;font-size:.8rem;font-weight:600;white-space:nowrap}
+.col-arr{width:20px;text-align:center;color:var(--text-3);font-size:.75rem;padding-right:4px}
+.positive{color:var(--green)}.negative{color:var(--red)}.neutral{color:var(--text-3)}
+.rank-medal{display:inline-block;width:22px;height:22px;border-radius:50%;text-align:center;
+  line-height:22px;font-size:.7rem;font-weight:700;color:#fff}
+.medal-1{background:var(--gold)}.medal-2{background:var(--silver)}.medal-3{background:var(--bronze)}
+
+/* ── Activity Feed ── */
+.feed{padding:8px 14px}
+.feed-item{padding:10px 12px;margin-bottom:8px;background:var(--card);border-radius:var(--radius-s);
+  border-left:3px solid var(--border);box-shadow:var(--shadow)}
+.feed-item.pos{border-left-color:var(--green)}.feed-item.neg{border-left-color:var(--red)}
+.feed-name{font-weight:600;font-size:.9rem}
+.feed-pts{font-weight:700;font-family:var(--font-d)}
+.feed-pts.pos{color:var(--green)}.feed-pts.neg{color:var(--red)}
+.feed-cat{color:var(--text-2);font-size:.8rem}
+.feed-time{color:var(--text-3);font-size:.75rem;margin-top:2px}
+.feed-row{display:flex;justify-content:space-between;align-items:baseline}
+
+/* ── Milestones ── */
+.milestones{padding:14px}
+.ms-card{background:var(--card);border-radius:var(--radius);padding:14px;margin-bottom:10px;box-shadow:var(--shadow);
+  border-left:3px solid var(--border)}
+.ms-card.reached{border-left-color:var(--gold)}
+.ms-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.ms-value{font-family:var(--font-d);font-weight:700;font-size:1.1rem}
+.ms-label{font-family:var(--font-d);font-weight:500;font-size:.75rem;text-transform:uppercase;
+  letter-spacing:.05em;color:var(--text-2)}
+.ms-names{font-size:.85rem;color:var(--text-2)}
+.ms-bar{height:4px;background:var(--border);border-radius:2px;margin-top:6px;overflow:hidden}
+.ms-fill{height:100%;background:var(--gold);border-radius:2px;transition:width .4s ease}
+
+/* ── Footer / Login ── */
+.footer-bar{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:520px;
+  padding:12px 16px;background:var(--card);border-top:1px solid var(--border);z-index:100;
+  box-shadow:0 -2px 8px rgba(0,0,0,.06)}
+.trainer-btn{width:100%;padding:13px;border-radius:var(--radius);border:none;
+  background:var(--primary);color:#fff;font-family:var(--font-d);font-size:.9rem;font-weight:600;
+  letter-spacing:.04em;text-transform:uppercase;cursor:pointer;display:flex;align-items:center;
+  justify-content:center;gap:8px;transition:background .15s}
+.trainer-btn:hover{background:var(--primary-h)}
+.trainer-btn svg{width:18px;height:18px}
+
+/* ── Modal ── */
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;display:flex;align-items:center;
+  justify-content:center;padding:20px;animation:fadeIn .2s ease}
+.modal-card{background:var(--card);border-radius:var(--radius);padding:28px 24px;width:100%;max-width:320px;
+  box-shadow:var(--shadow-m);text-align:center}
+.modal-title{font-family:var(--font-d);font-size:1.1rem;font-weight:600;margin-bottom:16px;
+  text-transform:uppercase;letter-spacing:.03em}
+.pin-input{width:140px;text-align:center;font-size:1.5rem;letter-spacing:.5em;padding:10px;
+  border:2px solid var(--border);border-radius:var(--radius-s);background:var(--bg);color:var(--text);
+  font-family:var(--font-d);font-weight:600}
+.pin-input:focus{outline:none;border-color:var(--primary)}
+
+/* ── Buttons ── */
+.btn{padding:10px 18px;border-radius:var(--radius-s);border:none;font-family:var(--font-b);
+  font-size:.9rem;font-weight:600;cursor:pointer;transition:all .15s;display:inline-flex;
+  align-items:center;justify-content:center;gap:6px;line-height:1.3}
+.btn-primary{background:var(--primary);color:#fff}.btn-primary:hover{background:var(--primary-h)}
+.btn-secondary{background:var(--bg-alt);color:var(--text);border:1px solid var(--border)}
+.btn-secondary:hover{background:var(--border)}
+.btn-danger{background:var(--red);color:#fff}.btn-danger:hover{opacity:.9}
+.btn-success{background:var(--green);color:#fff}
+.btn-sm{padding:6px 12px;font-size:.8rem}
+.btn-block{width:100%;padding:14px}
+.btn-group{display:flex;gap:8px}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+
+/* ── Action Grid ── */
+.action-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:14px}
+.action-card{background:var(--card);border-radius:var(--radius);padding:16px 12px;text-align:center;
+  box-shadow:var(--shadow);cursor:pointer;border:1px solid var(--border);transition:all .15s;
+  display:flex;flex-direction:column;align-items:center;gap:8px}
+.action-card:hover{box-shadow:var(--shadow-m);transform:translateY(-1px)}
+.action-card:active{transform:translateY(0)}
+.action-icon{width:32px;height:32px;color:var(--primary)}
+.action-icon svg{width:100%;height:100%}
+.action-label{font-family:var(--font-d);font-size:.8rem;font-weight:500;text-transform:uppercase;
+  letter-spacing:.03em;line-height:1.2}
+
+/* ── Sub-Screen ── */
+.sub-hdr{display:flex;align-items:center;gap:8px;padding:14px;background:var(--card);
+  border-bottom:1px solid var(--border)}
+.sub-title{font-family:var(--font-d);font-size:1rem;font-weight:600;text-transform:uppercase;letter-spacing:.03em}
+.sub-back{background:none;border:none;color:var(--primary);cursor:pointer;padding:4px;display:flex}
+.sub-back svg{width:22px;height:22px}
+.sub-content{padding:14px}
+.sub-footer{padding:14px;position:fixed;bottom:0;left:50%;transform:translateX(-50%);
+  width:100%;max-width:520px;background:var(--bg);z-index:90;
+  border-top:1px solid var(--border);box-shadow:0 -2px 8px rgba(0,0,0,.06)}
+
+/* ── Player Check List ── */
+.plist{display:flex;flex-direction:column;gap:6px}
+.pitem{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--card);
+  border-radius:var(--radius-s);border:1px solid var(--border);cursor:pointer;transition:background .1s;
+  min-height:48px}
+.pitem:active{background:var(--bg-alt)}
+.pitem.checked{border-color:var(--green);background:var(--green-s)}
+.pitem-name{flex:1;font-weight:600;font-size:.9rem}
+.pitem-extra{font-size:.75rem;color:var(--text-2);display:flex;align-items:center;gap:4px}
+.checkbox{width:22px;height:22px;border-radius:4px;border:2px solid var(--border);display:flex;
+  align-items:center;justify-content:center;flex-shrink:0;transition:all .15s;background:var(--card)}
+.checkbox.on{background:var(--green);border-color:var(--green);color:#fff}
+.checkbox svg{width:14px;height:14px}
+.fitness-badge{padding:3px 8px;border-radius:12px;font-size:.7rem;font-weight:600;
+  text-transform:uppercase;letter-spacing:.03em;cursor:pointer;transition:all .15s;
+  border:1px solid var(--border);color:var(--text-2);background:var(--bg)}
+.fitness-badge.on{background:var(--primary-s);border-color:var(--primary-l);color:var(--primary)}
+
+/* ── Team Selection ── */
+.team-row{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--border)}
+.team-name{flex:1;font-weight:600;font-size:.9rem}
+.team-btns{display:flex;gap:4px}
+.team-btn{width:40px;height:36px;border-radius:var(--radius-s);border:1px solid var(--border);
+  background:var(--card);font-family:var(--font-d);font-weight:700;font-size:.85rem;cursor:pointer;
+  transition:all .15s;color:var(--text-2)}
+.team-btn.ta{background:var(--primary);color:#fff;border-color:var(--primary)}
+.team-btn.tb{background:var(--text);color:var(--card);border-color:var(--text)}
+.team-btn.tn{background:var(--bg-alt);color:var(--text-3);border-color:var(--border)}
+.winner-btns{display:flex;gap:8px;margin-top:8px}
+.winner-btns .btn{flex:1}
+.team-count{text-align:center;padding:6px;font-size:.8rem;color:var(--text-2);
+  font-family:var(--font-d);font-weight:500}
+
+/* ── Forms ── */
+.form-group{margin-bottom:14px}
+.form-label{display:block;font-size:.8rem;font-weight:600;margin-bottom:4px;color:var(--text-2);
+  font-family:var(--font-d);text-transform:uppercase;letter-spacing:.04em}
+.form-input,.form-select{width:100%;padding:10px 12px;border:1px solid var(--border);
+  border-radius:var(--radius-s);background:var(--card);color:var(--text);font-size:.9rem;
+  font-family:var(--font-b)}
+.form-input:focus,.form-select:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 2px rgba(107,58,42,.15)}
+
+/* ── Info Cards ── */
+.info-card{background:var(--card);border-radius:var(--radius);padding:14px;margin-bottom:10px;
+  box-shadow:var(--shadow);border:1px solid var(--border)}
+.info-card h3{font-family:var(--font-d);font-size:.85rem;font-weight:600;text-transform:uppercase;
+  letter-spacing:.03em;margin:0 0 8px;color:var(--text-2)}
+
+/* ── Log ── */
+.log-item{background:var(--card);border-radius:var(--radius-s);padding:12px;margin-bottom:8px;
+  border:1px solid var(--border);cursor:pointer}
+.log-header{display:flex;justify-content:space-between;align-items:center}
+.log-date{font-family:var(--font-d);font-weight:600}
+.log-stats{font-size:.8rem;color:var(--text-2)}
+.log-details{margin-top:10px;padding-top:10px;border-top:1px solid var(--border);font-size:.85rem}
+.log-entry{display:flex;justify-content:space-between;padding:3px 0;color:var(--text-2)}
+
+/* ── Player Mgmt ── */
+.pm-item{display:flex;align-items:center;gap:8px;padding:10px 12px;background:var(--card);
+  border-radius:var(--radius-s);border:1px solid var(--border);margin-bottom:6px}
+.pm-item.inactive{opacity:.5}
+.pm-name{flex:1;font-weight:600;font-size:.9rem}
+.pm-actions{display:flex;gap:6px}
+.pm-btn{padding:8px 12px;border-radius:var(--radius-s);border:1px solid var(--border);min-height:36px;
+  background:var(--bg);font-size:.75rem;font-weight:600;cursor:pointer;color:var(--text-2);transition:all .15s}
+.pm-btn:hover{background:var(--border)}
+
+/* ── Empty State ── */
+.empty{text-align:center;padding:40px 20px;color:var(--text-2)}
+.empty-title{font-family:var(--font-d);font-size:1rem;font-weight:600;margin-bottom:4px;color:var(--text)}
+
+/* ── Toast ── */
+#toast-wrap{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);z-index:300;
+  display:flex;flex-direction:column;gap:6px;pointer-events:none;max-width:400px;width:90%}
+.toast{padding:10px 16px;border-radius:var(--radius-s);box-shadow:var(--shadow-m);
+  font-size:.85rem;font-weight:600;opacity:0;transform:translateY(12px);
+  transition:all .25s ease;text-align:center}
+.toast.show{opacity:1;transform:translateY(0)}
+.toast-ok{background:var(--green);color:#fff}
+.toast-err{background:var(--red);color:#fff}
+.toast-info{background:var(--card);color:var(--text);border:1px solid var(--border)}
+
+/* ── Confirmation ── */
+.confirm-box{background:var(--red-s);border:1px solid var(--red);border-radius:var(--radius);
+  padding:14px;margin-bottom:14px}
+.confirm-box p{margin:0 0 10px;font-size:.9rem}
+
+/* ── Section heading ── */
+.sec-heading{font-family:var(--font-d);font-size:.8rem;font-weight:600;text-transform:uppercase;
+  letter-spacing:.05em;color:var(--text-2);padding:14px 14px 6px}
+
+/* ── Animations ── */
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes slideUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+.fade-in{animation:fadeIn .2s ease}.slide-up{animation:slideUp .25s ease}
+
+/* ── Scrollable ── */
+.scroll-x{overflow-x:auto}
+
+/* ── Helpers ── */
+.mt-2{margin-top:14px}.mb-2{margin-bottom:14px}.text-center{text-align:center}
+.flex-between{display:flex;justify-content:space-between;align-items:center}
+.gap-2{gap:14px}.hidden{display:none!important}
+
+/* ── Radio-like select row ── */
+.select-row{display:flex;align-items:center;gap:10px;padding:12px;background:var(--card);
+  border-radius:var(--radius-s);border:1px solid var(--border);margin-bottom:6px;cursor:pointer;
+  min-height:48px;transition:all .15s}
+.select-row:active{background:var(--bg-alt)}
+.select-row.selected{border-color:var(--primary);background:var(--primary-s)}
+.radio{width:20px;height:20px;border-radius:50%;border:2px solid var(--border);flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;transition:all .15s}
+.radio.on{border-color:var(--primary)}.radio.on::after{content:'';width:10px;height:10px;
+  border-radius:50%;background:var(--primary)}
+
+/* ── Category badge ── */
+.cat-badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:.7rem;font-weight:600;
+  text-transform:uppercase;letter-spacing:.02em}
+.cat-pos{background:var(--green-s);color:var(--green)}
+.cat-neg{background:var(--red-s);color:var(--red)}
+
+/* ── Bonus list ── */
+.bonus-item{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--card);
+  border-radius:var(--radius-s);border:1px solid var(--border);margin-bottom:6px}
+.bonus-item.qualifies{border-left:3px solid var(--green)}
+.bonus-item.not-qual{border-left:3px solid var(--red);opacity:.7}
+.bonus-pct{font-family:var(--font-d);font-weight:700;font-size:.85rem;min-width:42px;text-align:right}
+.bonus-done{color:var(--green);font-size:.75rem;font-weight:600}
+
+/* ── Rules ── */
+.rules{padding:14px}
+.rule-card{background:var(--card);border-radius:var(--radius-s);padding:12px 14px;margin-bottom:8px;
+  border-left:3px solid var(--primary-l);box-shadow:var(--shadow)}
+.rule-card.rule-neg{border-left-color:var(--red)}
+.rule-card.rule-info{border-left-color:var(--gold)}
+.rule-title{font-family:var(--font-d);font-weight:600;font-size:.9rem;margin-bottom:2px}
+.rule-text{font-size:.85rem;color:var(--text-2);line-height:1.4}
+.rule-edit-row{display:flex;gap:6px;align-items:center;margin-top:8px}
+
+/* ── Erfolge Editor ── */
+.ms-edit-item{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--card);
+  border-radius:var(--radius-s);border:1px solid var(--border);margin-bottom:6px}
+.ms-edit-value{font-family:var(--font-d);font-weight:700;font-size:1rem;flex:1}
+
+/* ── Player Detail ── */
+.pd-stats{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:14px}
+.pd-stat{background:var(--card);border-radius:var(--radius-s);padding:10px;text-align:center;border:1px solid var(--border)}
+.pd-stat-val{font-family:var(--font-d);font-weight:700;font-size:1.2rem}
+.pd-stat-lbl{font-size:.7rem;color:var(--text-2);text-transform:uppercase;letter-spacing:.03em;font-family:var(--font-d)}
+.pd-entry{display:flex;justify-content:space-between;align-items:center;padding:8px 12px;background:var(--card);
+  border-radius:var(--radius-s);border:1px solid var(--border);margin-bottom:4px;font-size:.85rem}
+.pd-entry-info{display:flex;flex-direction:column;gap:1px}
+.pd-entry-cat{font-weight:600;font-size:.85rem}
+.pd-entry-meta{font-size:.75rem;color:var(--text-2)}
+.pd-entry-pts{font-family:var(--font-d);font-weight:700;font-size:.95rem}
+
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div id="modal-root"></div>
+<div id="toast-wrap"></div>
+
+<script>
+'use strict';
+
+/* ═══════════════════════════ CONSTANTS ═══════════════════════════ */
+const CATS=[
+  {id:'attendance',name:'Anwesenheit',pts:1},
+  {id:'fitness',name:'Fitnesseinheit',pts:1},
+  {id:'win_training',name:'Sieg Trainingsform',pts:2},
+  {id:'second_training',name:'Zweiter Platz Trainingsform',pts:1},
+  {id:'win_final',name:'Sieg Abschlussspiel',pts:2},
+  {id:'pot',name:'Spieler des Trainings',pts:2},
+  {id:'effort',name:'Besondere Einsatzbereitschaft',pts:1},
+  {id:'unsportsmanlike',name:'Unsportliches Verhalten',pts:-3},
+  {id:'weekly_theme',name:'Wochenthema erfüllt',pts:2},
+  {id:'challenge',name:'Challenge-Sieger',pts:2},
+  {id:'unexcused',name:'Unentschuldigtes Fehlen',pts:-2},
+  {id:'monthly_bonus',name:'Monatsbonus',pts:3},
+  {id:'starting',name:'Startbonus',pts:0},
+  {id:'other',name:'Sonstiges',pts:0}
+];
+const MANUAL_CATS=CATS.filter(c=>!['win_training','second_training','win_final','pot','monthly_bonus','starting'].includes(c.id));
+const THEMES=['Kopfballkönig','Assist-König','Tackling-Monster','Mentalitäts-Monster',
+  'Passsicherheit','Dauerbrenner','Elfmeterkönig','Teamplayer'];
+const DEFAULT_MILESTONES=[{value:25,title:'Bronze'},{value:50,title:'Silber'},{value:75,title:'Gold'},{value:100,title:'Legende'}];
+const DEFAULT_RULES=[
+  {id:'r1',title:'Anwesenheit',text:'+1 Punkt für Teilnahme am Training',pts:1},
+  {id:'r2',title:'Fitnesseinheit',text:'+1 Punkt für Fitness vor/nach dem Training',pts:1},
+  {id:'r3',title:'Sieg Trainingsform',text:'+2 Punkte für das Gewinnerteam',pts:2},
+  {id:'r4',title:'Zweiter Platz Trainingsform',text:'+1 Punkt für das Verliererteam (bei Unentschieden alle +1)',pts:1},
+  {id:'r5',title:'Sieg Abschlussspiel',text:'+2 Punkte für das Gewinnerteam',pts:2},
+  {id:'r6',title:'Spieler des Trainings',text:'+2 Punkte – vom Trainer gewählt',pts:2},
+  {id:'r7',title:'Wochenthema erfüllt',text:'+2 Punkte für besondere Leistung im Wochenthema'},
+  {id:'r8',title:'Challenge-Sieger',text:'+2 Punkte für den Gewinner einer Challenge'},
+  {id:'r9',title:'Besondere Einsatzbereitschaft',text:'+1 Punkt für überdurchschnittlichen Einsatz'},
+  {id:'r10',title:'Monatsbonus',text:'+3 Punkte bei ≥80% Anwesenheit im Monat'},
+  {id:'r11',title:'Unsportliches Verhalten',text:'-3 Punkte bei Unsportlichkeit oder Respektlosigkeit'},
+  {id:'r12',title:'Unentschuldigtes Fehlen',text:'-2 Punkte bei Fehlen ohne Absage'},
+  {id:'r13',title:'Startbonus',text:'Neue Spieler starten mit dem aktuellen Kaderdurchschnitt'},
+  {id:'r14',title:'Allgemeine Regeln',text:'Punkte können nie unter 0 fallen. Bei Punktegleichstand entscheidet die Anwesenheit.'}
+];
+const MONTHS=['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
+
+const I={
+  check:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="4,12 10,18 20,6"/></svg>',
+  users:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="9" cy="7" r="4"/><path d="M3 21v-2a4 4 0 014-4h4a4 4 0 014 4v2"/><circle cx="19" cy="7" r="3"/><path d="M22 21v-1.5a3 3 0 00-2.5-2.96"/></svg>',
+  shield:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L3 7v5c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7L12 2z"/></svg>',
+  star:'<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87L18.18 21 12 17.77 5.82 21 7 14.14l-5-4.87 6.91-1.01L12 2z"/></svg>',
+  target:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>',
+  cal:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>',
+  tag:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><circle cx="7" cy="7" r="1.5" fill="currentColor"/></svg>',
+  list:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><circle cx="4" cy="6" r="1.5" fill="currentColor"/><circle cx="4" cy="12" r="1.5" fill="currentColor"/><circle cx="4" cy="18" r="1.5" fill="currentColor"/></svg>',
+  lock:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>',
+  download:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7,10 12,15 17,10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>',
+  undo:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1,4 1,10 7,10"/><path d="M3.51 15a9 9 0 105.64-11.36L1 10"/></svg>',
+  goal:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><line x1="12" y1="4" x2="12" y2="20"/><line x1="2" y1="12" x2="22" y2="12"/></svg>',
+  back:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="15,18 9,12 15,6"/></svg>',
+  plus:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>',
+  trophy:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9H4.5a2.5 2.5 0 010-5H6M18 9h1.5a2.5 2.5 0 000-5H18M4 22h16M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20 7 22M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20 17 22M18 2H6v7a6 6 0 0012 0V2z"/></svg>',
+  book:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/><line x1="8" y1="7" x2="16" y2="7"/><line x1="8" y1="11" x2="14" y2="11"/></svg>',
+  flag:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>'
+};
+
+/* ═══════════════════════════ STATE ═══════════════════════════ */
+let S={players:[],entries:[],weeklyTheme:'',weeklyThemeDate:'',pin:'1234',rules:DEFAULT_RULES.map(r=>({...r})),milestones:DEFAULT_MILESTONES.map(m=>({...m}))};
+let UI={view:'player',tab:'table',screen:null,sort:'points',auth:false,authAt:0,pinModal:false};
+const AUTH_TIMEOUT=30*60*1000; /* 30 minutes */
+function isAuth(){return UI.auth&&(Date.now()-UI.authAt<AUTH_TIMEOUT)}
+/* ── Firebase Config ── */
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyCi2ZXylN_rf6N8S5PXPxxqBftGBy3KX1Y",
+  authDomain: "trainingsliga-fcsp-4.firebaseapp.com",
+  projectId: "trainingsliga-fcsp-4",
+  storageBucket: "trainingsliga-fcsp-4.firebasestorage.app",
+  messagingSenderId: "1024456343662",
+  appId: "1:1024456343662:web:7073715de48df48ad2e67f"
+};
+const FB_DOC = 'trainingsliga/data';
+let fbReady=false,fbDb=null,fbSaving=false;
+
+/* temp screen state */
+let tAtt={},tFit={},tDate='',tTeams={},tWinner=null,tSelPlayer=null;
+let tCat='attendance',tPts=1,tComment='',tNewName='',tEditId=null,tEditName='';
+let tTheme='',tCustom='',tNewPin='',tConfPin='',tLogOpen={};
+let tRuleEditId=null,tRuleTitle='',tRuleText='',tRulePts=null,tMsEditIdx=null,tMsValue='',tMsTitle='',tNewMsValue='',tNewMsTitle='';
+
+function defaultState(){return{players:[],entries:[],weeklyTheme:'',weeklyThemeDate:'',pin:'1234',
+  rules:DEFAULT_RULES.map(r=>({...r})),milestones:DEFAULT_MILESTONES.map(m=>({...m}))}}
+function migrate(d){
+  /* ensure existing rules get pts from defaults where applicable */
+  let rules=d.rules&&d.rules.length?d.rules:DEFAULT_RULES.map(r=>({...r}));
+  rules=rules.map(r=>{
+    if(typeof r.pts==='number')return r;
+    const def=DEFAULT_RULES.find(dr=>dr.title===r.title);
+    return def&&typeof def.pts==='number'?{...r,pts:def.pts}:r;
+  });
+  return{players:d.players||[],entries:d.entries||[],
+  weeklyTheme:d.weeklyTheme||'',weeklyThemeDate:d.weeklyThemeDate||'',pin:d.pin||'1234',
+  rules,milestones:migrateMilestones(d.milestones)}}
+function migrateMilestones(arr){
+  if(!arr||!arr.length)return DEFAULT_MILESTONES.map(m=>({...m}));
+  return arr.map(m=>{
+    if(typeof m==='number'){
+      const def=DEFAULT_MILESTONES.find(d=>d.value===m);
+      return{value:m,title:def?def.title:m+' Punkte'}
+    }
+    return{value:m.value,title:m.title||m.value+' Punkte'}
+  })}
+
+/* ═══════════════════════════ PERSISTENCE ═══════════════════════════ */
+async function initFirebase(){
+  if(FIREBASE_CONFIG.apiKey==='DEIN_API_KEY'){
+    console.warn('Firebase nicht konfiguriert – lokaler Modus');return false}
+  try{
+    const app=firebase.initializeApp(FIREBASE_CONFIG);
+    fbDb=firebase.firestore();
+    await firebase.auth().signInAnonymously();
+    fbReady=true;
+    /* Echtzeit-Listener: aktualisiert bei jedem Gerät automatisch */
+    fbDb.doc(FB_DOC).onSnapshot(snap=>{
+      if(fbSaving){fbSaving=false;return}
+      if(snap.exists){S=migrate(snap.data());R()}
+    });
+    return true;
+  }catch(e){console.error('Firebase init error:',e);return false}
+}
+
+async function load(){
+  /* Firebase-Daten kommen über onSnapshot – hier nur Fallback */
+  if(fbReady){
+    try{const snap=await fbDb.doc(FB_DOC).get();
+      if(snap.exists){S=migrate(snap.data());return}}catch(e){}
+  }
+  try{const s=localStorage.getItem('tl_v2');if(s){S=migrate(JSON.parse(s));return}}catch(e){}
+  S=defaultState();
+}
+
+async function save(){
+  try{localStorage.setItem('tl_v2',JSON.stringify(S))}catch(e){}
+  if(fbReady){
+    try{fbSaving=true;await fbDb.doc(FB_DOC).set(JSON.parse(JSON.stringify(S)))}
+    catch(e){fbSaving=false;console.error('Save error:',e);toast('Speichern fehlgeschlagen','err')}
+  }
+}
+
+/* ═══════════════════════════ UTILITIES ═══════════════════════════ */
+function uid(){return crypto.randomUUID?crypto.randomUUID():(
+  'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g,c=>{const r=Math.random()*16|0;return(c==='x'?r:(r&0x3|0x8)).toString(16)}))}
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
+function today(){return new Date().toISOString().slice(0,10)}
+function isoWeek(dt){const d=new Date(Date.UTC(dt.getFullYear(),dt.getMonth(),dt.getDate()));
+  d.setUTCDate(d.getUTCDate()+4-(d.getUTCDay()||7));
+  const y=new Date(Date.UTC(d.getUTCFullYear(),0,1));return Math.ceil((((d-y)/864e5)+1)/7)}
+function fmtDate(ds){if(!ds)return'';const[y,m,d]=ds.split('-');return`${d}.${m}.${y}`}
+function relDate(ds){const now=new Date();now.setHours(0,0,0,0);const[y,m,d]=ds.split('-');
+  const dt=new Date(y,m-1,d);const diff=Math.round((now-dt)/864e5);
+  if(diff===0)return'Heute';if(diff===1)return'Gestern';if(diff<7)return`vor ${diff} Tagen`;return fmtDate(ds)}
+function fmtTime(ts){const d=new Date(ts);return`${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`}
+function monthStr(d){const dt=d||new Date();return`${dt.getFullYear()}-${String(dt.getMonth()+1).padStart(2,'0')}`}
+function monthName(d){return MONTHS[(d||new Date()).getMonth()]}
+
+/* ═══════════════════════════ QUERIES ═══════════════════════════ */
+function activePlayers(){return S.players.filter(p=>p.active)}
+
+function pts(pid){return Math.max(0,S.entries.filter(e=>e.playerId===pid).reduce((s,e)=>s+e.points,0))}
+
+function ptsAsOf(pid,before){return Math.max(0,S.entries.filter(e=>e.playerId===pid&&e.timestamp<=before).reduce((s,e)=>s+e.points,0))}
+
+function weekDelta(pid){const now=Date.now(),wa=now-7*864e5;return pts(pid)-ptsAsOf(pid,wa)}
+
+function attCount(pid,ms){
+  return S.entries.filter(e=>e.playerId===pid&&e.category==='Anwesenheit'&&(!ms||e.date.startsWith(ms))).length}
+
+
+function rulePts(title,fallback){
+  const rule=(S.rules||[]).find(r=>r.title===title);
+  return rule&&typeof rule.pts==='number'?rule.pts:fallback;
+}
+
+function avgPts(){const ap=activePlayers();if(!ap.length)return 0;
+  return Math.round(ap.reduce((s,p)=>s+pts(p.id),0)/ap.length)}
+
+function sortedPlayers(){
+  const ap=activePlayers().map(p=>({...p,points:pts(p.id),delta:weekDelta(p.id),att:attCount(p.id)}));
+  if(UI.sort==='name')ap.sort((a,b)=>a.name.localeCompare(b.name,'de'));
+  else if(UI.sort==='change')ap.sort((a,b)=>b.delta-a.delta||b.points-a.points||b.att-a.att);
+  else ap.sort((a,b)=>b.points-a.points||b.att-a.att);
+  return ap;
+}
+
+function recentFeed(n=10){
+  return S.entries.slice().sort((a,b)=>b.timestamp-a.timestamp).slice(0,n).map(e=>{
+    const p=S.players.find(pl=>pl.id===e.playerId);
+    const cat=CATS.find(c=>c.name===e.category)||{};
+    return{...e,playerName:p?p.name:'Unbekannt',catId:cat.id||'other'}})}
+
+function milestoneData(ms){
+  const t=typeof ms==='number'?ms:ms.value;
+  const title=typeof ms==='object'&&ms.title?ms.title:'';
+  const reached=activePlayers().filter(p=>pts(p.id)>=t);
+  const closest=activePlayers().filter(p=>pts(p.id)<t)
+    .sort((a,b)=>pts(b.id)-pts(a.id))[0];
+  return{threshold:t,title,reached,closest}}
+
+function trainingSessions(){
+  const map={};
+  S.entries.forEach(e=>{if(!map[e.date])map[e.date]=[];map[e.date].push(e)});
+  return Object.keys(map).sort((a,b)=>b.localeCompare(a)).map(d=>({
+    date:d,entries:map[d],
+    playerCount:new Set(map[d].map(e=>e.playerId)).size,
+    totalPts:map[d].reduce((s,e)=>s+e.points,0)
+  }))}
+
+function monthlyBonusData(){
+  const ms=monthStr();
+  const dates=new Set(S.entries.filter(e=>e.category==='Anwesenheit'&&e.date.startsWith(ms)).map(e=>e.date));
+  const total=dates.size;
+  if(!total)return{total:0,month:monthName(),players:[]};
+  const pdata=activePlayers().map(p=>{
+    const att=attCount(p.id,ms);const rate=att/total;
+    const done=S.entries.some(e=>e.playerId===p.id&&e.category==='Monatsbonus'&&e.date.startsWith(ms));
+    return{...p,att,total,rate,qualifies:rate>=0.8,done}});
+  return{total,month:monthName(),players:pdata}}
+
+/* ═══════════════════════════ MUTATIONS ═══════════════════════════ */
+function addPlayer(name){
+  const avg=avgPts();
+  const p={id:uid(),name:name.trim(),active:true,createdAt:Date.now()};
+  S.players.push(p);
+  if(avg>0){
+    S.entries.push({id:uid(),playerId:p.id,points:avg,category:'Startbonus',
+      comment:`Einstieg mit Kaderdurchschnitt (${avg})`,date:today(),timestamp:Date.now(),batchId:uid()});
+  }
+}
+
+function addEntries(list){
+  const batch=uid();let ts=Date.now();const d=tDate||today();
+  list.forEach(e=>{S.entries.push({id:uid(),playerId:e.pid,points:e.pts,category:e.cat,
+    comment:e.comment||'',date:d,timestamp:ts++,batchId:batch})});
+}
+
+function undoLast(){
+  if(!S.entries.length)return false;
+  const last=S.entries[S.entries.length-1];const bid=last.batchId;
+  const count=S.entries.filter(e=>e.batchId===bid).length;
+  S.entries=S.entries.filter(e=>e.batchId!==bid);
+  return count;
+}
+
+/* ═══════════════════════════ RENDER ═══════════════════════════ */
+const app=document.getElementById('app');
+
+/* Update button disabled state without full re-render (preserves input focus) */
+function updateBtnState(){
+  const saveRule=app.querySelector('[data-action="save-rule"]');
+  if(saveRule)saveRule.disabled=!tRuleTitle.trim()||!tRuleText.trim();
+  const saveMs=app.querySelector('[data-action="save-ms-edit"]');
+  if(saveMs)saveMs.disabled=!tMsValue||parseInt(tMsValue)<=0;
+  const addMs=app.querySelector('[data-action="add-ms"]');
+  if(addMs)addMs.disabled=!tNewMsValue||parseInt(tNewMsValue)<=0;
+}
+
+let tSearchFilter='';
+let tFeedLimit=15;
+let tLogLimit=20;
+let tDetailPlayer=null;
+let tDetailLimit=20;
+
+/* Update filtered player list without full re-render (preserves search input focus) */
+function updateFilteredList(){
+  const plist=app.querySelector('.plist');
+  if(!plist)return;
+  const allPlayers=activePlayers().sort((a,b)=>a.name.localeCompare(b.name,'de'));
+  const players=tSearchFilter?allPlayers.filter(p=>p.name.toLowerCase().includes(tSearchFilter.toLowerCase())):allPlayers;
+  /* Detect context: attendance vs game */
+  const isGame=!!app.querySelector('.team-row');
+  if(isGame){
+    plist.innerHTML=players.map(p=>{
+      const t=tTeams[p.id]||'';
+      return`<div class="team-row">
+        <span class="team-name">${esc(p.name)}</span>
+        <div class="team-btns">
+          <button class="team-btn ${t==='a'?'ta':''}" data-action="set-team" data-id="${p.id}" data-team="a">A</button>
+          <button class="team-btn ${t==='b'?'tb':''}" data-action="set-team" data-id="${p.id}" data-team="b">B</button>
+          <button class="team-btn ${!t?'tn':''}" data-action="set-team" data-id="${p.id}" data-team="">—</button>
+        </div>
+      </div>`}).join('');
+  }else{
+    plist.innerHTML=players.map(p=>{
+      const on=!!tAtt[p.id];const fit=!!tFit[p.id];
+      return`<div class="pitem ${on?'checked':''}" data-action="toggle-att" data-id="${p.id}">
+        <div class="checkbox ${on?'on':''}">${on?I.check:''}</div>
+        <span class="pitem-name">${esc(p.name)}</span>
+        ${on?`<span class="fitness-badge ${fit?'on':''}" data-action="toggle-fit" data-id="${p.id}" onclick="event.stopPropagation()">Fitness${fit?' +1':''}</span>`:''}
+      </div>`}).join('');
+  }
+}
+
+function R(){
+  app.innerHTML=UI.view==='player'?playerViewHtml():trainerViewHtml();
+  const mr=document.getElementById('modal-root');
+  mr.innerHTML=UI.pinModal?pinModalHtml():'';
+  if(UI.pinModal){const pi=document.getElementById('pin-input');if(pi)pi.focus()}
+}
+
+/* ── Player View ── */
+function playerViewHtml(){
+  const kw=isoWeek(new Date());
+  return`
+  <div class="hdr-wrap">
+  <div class="hdr">
+    <div class="hdr-title">Trainingsliga</div>
+    <div class="hdr-sub">
+      <span class="hdr-team">FCSP Vierte</span>
+      <span class="hdr-kw">KW ${kw}</span>
+    </div>
+  </div>
+  ${S.weeklyTheme&&!tDetailPlayer?`<div class="theme-banner"><span class="theme-label">Wochenthema</span><span class="theme-value">${esc(S.weeklyTheme)}</span></div>`:''}
+  ${tDetailPlayer?'':`<div class="tab-bar">
+    <button class="tab-btn ${UI.tab==='table'?'active':''}" data-action="tab" data-tab="table">Tabelle</button>
+    <button class="tab-btn ${UI.tab==='feed'?'active':''}" data-action="tab" data-tab="feed">Aktivitäten</button>
+    <button class="tab-btn ${UI.tab==='ms'?'active':''}" data-action="tab" data-tab="ms">Erfolge</button>
+    <button class="tab-btn ${UI.tab==='rules'?'active':''}" data-action="tab" data-tab="rules">Regeln</button>
+  </div>`}
+  </div>
+  ${tDetailPlayer?playerDetailHtml():UI.tab==='table'?tableHtml():UI.tab==='feed'?feedHtml():UI.tab==='rules'?rulesHtml():milestonesHtml()}
+  <div class="footer-bar">
+    <button class="trainer-btn" data-action="open-pin">${I.lock} Trainer-Bereich</button>
+  </div>`}
+
+function tableHtml(){
+  const players=sortedPlayers();
+  if(!players.length)return`<div class="empty slide-up"><div class="empty-title">Noch keine Spieler</div><p>Füge Spieler im Trainer-Bereich hinzu.</p></div>`;
+  return`
+  <div class="sort-bar">
+    <button class="sort-btn ${UI.sort==='points'?'active':''}" data-action="sort" data-sort="points">Punkte</button>
+    <button class="sort-btn ${UI.sort==='name'?'active':''}" data-action="sort" data-sort="name">Name</button>
+    <button class="sort-btn ${UI.sort==='change'?'active':''}" data-action="sort" data-sort="change">7 Tage</button>
+  </div>
+  <div class="scroll-x">
+  <table class="league-table">
+    <thead><tr><th class="col-rank">#</th><th>Spieler</th><th class="col-pts">Pkt</th><th class="col-chg">+/-</th><th class="col-arr"></th></tr></thead>
+    <tbody>${players.map((p,i)=>{
+      const changeClass=p.delta>0?'positive':p.delta<0?'negative':'neutral';
+      const arrow=p.delta>0?'▲':p.delta<0?'▼':'▬';
+      const medal=i<3?`<span class="rank-medal medal-${i+1}">${i+1}</span>`:`${i+1}`;
+      return`<tr class="slide-up" style="animation-delay:${i*30}ms" data-action="player-detail" data-id="${p.id}">
+        <td class="col-rank">${medal}</td>
+        <td class="col-name">${esc(p.name)}</td>
+        <td class="col-pts">${p.points}</td>
+        <td class="col-chg ${changeClass}"><span>${arrow}</span> ${p.delta>0?'+':''}${p.delta}</td>
+        <td class="col-arr">›</td>
+      </tr>`}).join('')}</tbody>
+  </table></div>`}
+
+function feedHtml(){
+  const total=S.entries.length;
+  const items=recentFeed(tFeedLimit);
+  if(!items.length)return`<div class="empty slide-up"><div class="empty-title">Keine Aktivitäten</div><p>Punkte werden hier als Feed angezeigt.</p></div>`;
+  let lastDate='';
+  const hasMore=total>tFeedLimit;
+  return`<div class="feed">${items.map(e=>{
+    const dateLabel=relDate(e.date);const showDate=dateLabel!==lastDate;lastDate=dateLabel;
+    const pos=e.points>0;const neg=e.points<0;
+    return`${showDate?`<div class="sec-heading">${dateLabel}</div>`:''}
+    <div class="feed-item ${pos?'pos':neg?'neg':''} slide-up">
+      <div class="feed-row"><span class="feed-name">${esc(e.playerName)}</span>
+        <span class="feed-pts ${pos?'pos':neg?'neg':''}">${pos?'+':''}${e.points}</span></div>
+      <div class="feed-cat">${esc(e.category)}${e.comment?` – ${esc(e.comment)}`:''}</div>
+      <div class="feed-time">${fmtTime(e.timestamp)}</div>
+    </div>`}).join('')}
+  ${hasMore?`<button class="btn btn-secondary btn-block mt-2" data-action="feed-more" style="margin:0 14px 14px;width:calc(100% - 28px)">Mehr anzeigen (${total-tFeedLimit} weitere)</button>`:''}</div>`}
+
+function msVal(m){return typeof m==='number'?m:m.value}
+function msSorted(){return(S.milestones&&S.milestones.length?S.milestones:DEFAULT_MILESTONES).slice().sort((a,b)=>msVal(a)-msVal(b))}
+function milestonesHtml(){
+  const ms=msSorted();
+  return`<div class="milestones">${ms.slice().reverse().map(m=>{
+    const d=milestoneData(m);const t=d.threshold;const ap=activePlayers();
+    const best=ap.length?Math.max(...ap.map(p=>pts(p.id))):0;
+    const pct=t>0?Math.min(100,Math.round((best/t)*100)):0;
+    return`<div class="ms-card ${d.reached.length?'reached':''} slide-up">
+      <div class="ms-header">
+        <span class="ms-value">${d.title?esc(d.title):t+' Punkte'}</span>
+        <span class="ms-label">${d.reached.length} Spieler</span>
+      </div>
+      ${d.title?`<div style="font-size:.75rem;color:var(--text-3);margin-bottom:4px">${t} Punkte</div>`:''}
+      ${d.reached.length?`<div class="ms-names">${d.reached.map(p=>esc(p.name)).join(', ')}</div>`
+        :d.closest?`<div class="ms-names" style="color:var(--text-3)">Nächster: ${esc(d.closest.name)} (${pts(d.closest.id)}/${t})</div>`
+        :`<div class="ms-names" style="color:var(--text-3)">– noch niemand –</div>`}
+      <div class="ms-bar"><div class="ms-fill" style="width:${pct}%"></div></div>
+      ${!d.reached.length&&best>0?`<div style="font-size:.7rem;color:var(--text-3);margin-top:3px;text-align:right">${pct}% erreicht</div>`:''}
+    </div>`}).join('')}</div>`}
+
+/* ── Player Detail ── */
+function playerDetailHtml(){
+  const p=S.players.find(pl=>pl.id===tDetailPlayer);
+  if(!p)return'';
+  const points=pts(p.id);
+  const delta=weekDelta(p.id);
+  const ms=monthStr();
+  const dates=new Set(S.entries.filter(e=>e.category==='Anwesenheit'&&e.date.startsWith(ms)).map(e=>e.date));
+  const totalTrainings=dates.size;
+  const myAtt=attCount(p.id,ms);
+  const attPct=totalTrainings?Math.round((myAtt/totalTrainings)*100):0;
+  const totalAtt=attCount(p.id);
+  const entries=S.entries.filter(e=>e.playerId===p.id).sort((a,b)=>b.timestamp-a.timestamp);
+  const visible=entries.slice(0,tDetailLimit);
+  const hasMore=entries.length>tDetailLimit;
+  const rank=sortedPlayers().findIndex(sp=>sp.id===p.id)+1;
+  return`
+  <div class="sub-hdr"><button class="sub-back" data-action="close-detail">${I.back}</button>
+    <span class="sub-title">${esc(p.name)}</span></div>
+  <div class="sub-content">
+    <div class="pd-stats">
+      <div class="pd-stat"><div class="pd-stat-val">${rank>0?'#'+rank:'–'}</div><div class="pd-stat-lbl">Platz</div></div>
+      <div class="pd-stat"><div class="pd-stat-val">${points}</div><div class="pd-stat-lbl">Punkte</div></div>
+      <div class="pd-stat"><div class="pd-stat-val ${delta>0?'positive':delta<0?'negative':''}">${delta>0?'+':''}${delta}</div><div class="pd-stat-lbl">7 Tage</div></div>
+    </div>
+    <div class="pd-stats" style="grid-template-columns:1fr 1fr">
+      <div class="pd-stat"><div class="pd-stat-val">${totalAtt}</div><div class="pd-stat-lbl">Anwesenheit</div></div>
+      <div class="pd-stat"><div class="pd-stat-val" style="color:${attPct>=80?'var(--green)':attPct>0?'var(--red)':'var(--text)'}">${totalTrainings?attPct+'%':'–'}</div><div class="pd-stat-lbl">${monthName()} (${myAtt}/${totalTrainings})</div></div>
+    </div>
+    <div class="sec-heading">Punktehistorie (${entries.length})</div>
+    ${!entries.length?`<div class="empty" style="padding:20px"><p>Noch keine Einträge</p></div>`:`
+    ${visible.map(e=>{
+      const pos=e.points>0;const neg=e.points<0;
+      return`<div class="pd-entry slide-up">
+        <div class="pd-entry-info">
+          <span class="pd-entry-cat">${esc(e.category)}${e.comment?' – '+esc(e.comment):''}</span>
+          <span class="pd-entry-meta">${fmtDate(e.date)}</span>
+        </div>
+        <span class="pd-entry-pts ${pos?'positive':neg?'negative':''}">${pos?'+':''}${e.points}</span>
+      </div>`}).join('')}
+    ${hasMore?`<button class="btn btn-secondary btn-block mt-2" data-action="detail-more">Mehr anzeigen (${entries.length-tDetailLimit} weitere)</button>`:''}`}
+  </div>`}
+
+/* ── Rules (Player View) ── */
+function ruleClass(r){
+  if(/[-–]\s*\d/.test(r.text)||/abzug|strafe|verlust|minus/i.test(r.text))return'rule-neg';
+  if(/allgemein|start|info|hinweis|regel/i.test(r.title)&&!/\+\d/.test(r.text))return'rule-info';
+  return'';
+}
+function rulesHtml(){
+  const rules=S.rules&&S.rules.length?S.rules:DEFAULT_RULES;
+  if(!rules.length)return`<div class="empty slide-up"><div class="empty-title">Keine Regeln hinterlegt</div></div>`;
+  return`<div class="rules">${rules.map(r=>`
+    <div class="rule-card ${ruleClass(r)} slide-up">
+      <div class="rule-title">${esc(r.title)}</div>
+      <div class="rule-text">${esc(r.text)}</div>
+    </div>`).join('')}</div>`}
+
+/* ── PIN Modal ── */
+function pinModalHtml(){
+  return`<div class="modal" id="pin-modal" onclick="if(event.target===this){closePinModal()}">
+    <div class="modal-card">
+      <div class="modal-title">Trainer-Zugang</div>
+      <div class="form-group"><input type="password" inputmode="numeric" pattern="[0-9]*" maxlength="6"
+        class="pin-input" id="pin-input" placeholder="••••" autocomplete="off"
+        onkeydown="if(event.key==='Enter'){event.preventDefault();handlePinSubmit()}"></div>
+      <button class="btn btn-primary btn-block" type="button" onclick="handlePinSubmit()">Bestätigen</button>
+    </div>
+  </div>`}
+
+function closePinModal(){UI.pinModal=false;R()}
+
+/* ── Trainer View ── */
+function trainerViewHtml(){
+  const kw=isoWeek(new Date());
+  return`
+  <div class="hdr-wrap">
+  <div class="hdr">
+    <div class="hdr-row">
+      <button class="hdr-back" data-action="back-player">${I.back} Zurück</button>
+      <span class="hdr-kw">KW ${kw}</span>
+    </div>
+    <div class="hdr-title" style="margin-top:4px">Trainer</div>
+  </div>
+  </div>
+  ${UI.screen?subScreenHtml():trainerMenuHtml()}`}
+
+function trainerMenuHtml(){
+  const groups=[
+    {title:'Training',cards:[
+      {id:'attendance',icon:I.check,label:'Anwesenheit'},
+      {id:'game',icon:I.shield,label:'Spielform'},
+      {id:'final',icon:I.goal,label:'Abschlussspiel'},
+      {id:'pot',icon:I.star,label:'Spieler d. Trainings'},
+      {id:'single',icon:I.target,label:'Einzelpunkte'},
+      {id:'bonus',icon:I.trophy,label:'Monatsbonus'}
+    ]},
+    {title:'Verwaltung',cards:[
+      {id:'players',icon:I.users,label:'Spieler verwalten'},
+      {id:'theme',icon:I.tag,label:'Wochenthema'},
+      {id:'edit-rules',icon:I.book,label:'Regeln bearbeiten'},
+      {id:'edit-milestones',icon:I.flag,label:'Erfolge'}
+    ]},
+    {title:'System',cards:[
+      {id:'log',icon:I.list,label:'Trainings-Log'},
+      {id:'pin',icon:I.lock,label:'PIN ändern'},
+      {id:'data',icon:I.download,label:'Daten'},
+      {id:'undo',icon:I.undo,label:'Rückgängig'}
+    ]}
+  ];
+  return groups.map(g=>`
+    <div class="sec-heading" style="padding:14px 14px 0">${g.title}</div>
+    <div class="action-grid">${g.cards.map(c=>`
+      <div class="action-card slide-up" data-action="screen" data-screen="${c.id}">
+        <div class="action-icon">${c.icon}</div>
+        <div class="action-label">${c.label}</div>
+      </div>`).join('')}</div>`).join('')}
+
+function subScreenHtml(){
+  switch(UI.screen){
+    case'attendance':return attendanceHtml();
+    case'game':return gameHtml('game');
+    case'final':return gameHtml('final');
+    case'pot':return potHtml();
+    case'single':return singleHtml();
+    case'players':return playerMgmtHtml();
+    case'bonus':return bonusHtml();
+    case'theme':return themeHtml();
+    case'edit-rules':return editRulesHtml();
+    case'edit-milestones':return editMilestonesHtml();
+    case'log':return logHtml();
+    case'pin':return pinChangeHtml();
+    case'data':return dataHtml();
+    case'undo':return undoHtml();
+    default:return'';
+  }
+}
+
+function subHdr(title){
+  return`<div class="sub-hdr"><button class="sub-back" data-action="screen-back">${I.back}</button>
+    <span class="sub-title">${title}</span></div>`}
+
+/* ── Attendance ── */
+function attendanceHtml(){
+  const allPlayers=activePlayers().sort((a,b)=>a.name.localeCompare(b.name,'de'));
+  const players=tSearchFilter?allPlayers.filter(p=>p.name.toLowerCase().includes(tSearchFilter.toLowerCase())):allPlayers;
+  const checkedCount=allPlayers.filter(p=>tAtt[p.id]).length;
+  return`${subHdr('Anwesenheit eintragen')}
+  <div class="sub-content">
+    <div class="form-group">
+      <label class="form-label">Datum</label>
+      <input type="date" class="form-input" value="${tDate}" data-change="att-date" id="att-date">
+    </div>
+    ${allPlayers.length>12?`<div class="form-group"><input type="text" class="form-input" value="${esc(tSearchFilter)}" data-change="search-filter" placeholder="Spieler suchen..." style="font-size:.85rem"></div>`:''}
+    <div class="flex-between mb-2">
+      <span style="font-size:.85rem;color:var(--text-2)">${checkedCount}/${allPlayers.length} ausgewählt</span>
+      <div class="btn-group">
+        <button class="btn btn-sm btn-secondary" data-action="att-all">Alle</button>
+        <button class="btn btn-sm btn-secondary" data-action="att-none">Keine</button>
+      </div>
+    </div>
+    <div class="plist">
+    ${players.map(p=>{
+      const on=!!tAtt[p.id];const fit=!!tFit[p.id];
+      return`<div class="pitem ${on?'checked':''}" data-action="toggle-att" data-id="${p.id}">
+        <div class="checkbox ${on?'on':''}">${on?I.check:''}</div>
+        <span class="pitem-name">${esc(p.name)}</span>
+        ${on?`<span class="fitness-badge ${fit?'on':''}" data-action="toggle-fit" data-id="${p.id}" onclick="event.stopPropagation()">Fitness${fit?' +'+rulePts('Fitnesseinheit',1):''}</span>`:''}
+      </div>`}).join('')}
+    </div>
+    <div class="info-card" style="font-size:.8rem;color:var(--text-2);margin-top:12px">
+      Anwesenheit: +${rulePts('Anwesenheit',1)} · Fitness: +${rulePts('Fitnesseinheit',1)} <span style="color:var(--text-3)">(änderbar unter Regeln)</span>
+    </div>
+  </div>
+  <div class="sub-footer">
+    <button type="button" class="btn btn-primary btn-block" data-action="save-att" ${checkedCount===0?'disabled':''}>
+      Anwesenheit speichern (${checkedCount})</button>
+  </div>`}
+
+/* ── Game Result ── */
+function gameHtml(type){
+  const title=type==='game'?'Spielform-Ergebnis':'Abschlussspiel';
+  const allPlayers=activePlayers().sort((a,b)=>a.name.localeCompare(b.name,'de'));
+  const players=tSearchFilter?allPlayers.filter(p=>p.name.toLowerCase().includes(tSearchFilter.toLowerCase())):allPlayers;
+  const teamA=allPlayers.filter(p=>tTeams[p.id]==='a');
+  const teamB=allPlayers.filter(p=>tTeams[p.id]==='b');
+  const canSave=teamA.length>0&&teamB.length>0&&tWinner;
+  return`${subHdr(title)}
+  <div class="sub-content">
+    <div class="form-group">
+      <label class="form-label">Datum</label>
+      <input type="date" class="form-input" value="${tDate}" data-change="att-date" id="game-date">
+    </div>
+    ${allPlayers.length>12?`<div class="form-group"><input type="text" class="form-input" value="${esc(tSearchFilter)}" data-change="search-filter" placeholder="Spieler suchen..." style="font-size:.85rem"></div>`:''}
+    <div class="team-count">Team A: ${teamA.length} &nbsp;·&nbsp; Team B: ${teamB.length}</div>
+    <div class="plist" style="margin-bottom:16px">
+    ${players.map(p=>{
+      const t=tTeams[p.id]||'';
+      return`<div class="team-row">
+        <span class="team-name">${esc(p.name)}</span>
+        <div class="team-btns">
+          <button class="team-btn ${t==='a'?'ta':''}" data-action="set-team" data-id="${p.id}" data-team="a">A</button>
+          <button class="team-btn ${t==='b'?'tb':''}" data-action="set-team" data-id="${p.id}" data-team="b">B</button>
+          <button class="team-btn ${!t?'tn':''}" data-action="set-team" data-id="${p.id}" data-team="">—</button>
+        </div>
+      </div>`}).join('')}
+    </div>
+    <div class="form-group">
+      <label class="form-label">Sieger</label>
+      <div class="winner-btns">
+        <button class="btn ${tWinner==='a'?'btn-primary':'btn-secondary'}" data-action="set-winner" data-team="a">Team A</button>
+        <button class="btn ${tWinner==='b'?'btn-primary':'btn-secondary'}" data-action="set-winner" data-team="b">Team B</button>
+        ${type==='game'?`<button class="btn ${tWinner==='draw'?'btn-primary':'btn-secondary'}" data-action="set-winner" data-team="draw">Unent.</button>`:''}
+      </div>
+    </div>
+    <div class="info-card" style="font-size:.8rem;color:var(--text-2)">
+      ${type==='game'?`Sieger: +${rulePts('Sieg Trainingsform',2)} (Sieg Trainingsform) · Verlierer: +${rulePts('Zweiter Platz Trainingsform',1)} (Zweiter Platz) · Unentschieden: alle +${rulePts('Zweiter Platz Trainingsform',1)}`
+        :`Sieger: +${rulePts('Sieg Abschlussspiel',2)} (Sieg Abschlussspiel)`}
+    </div>
+  </div>
+  <div class="sub-footer">
+    <button type="button" class="btn btn-primary btn-block" data-action="save-game" data-type="${type}" ${!canSave?'disabled':''}>
+      Ergebnis speichern</button>
+  </div>`}
+
+/* ── Player of Training ── */
+function potHtml(){
+  const players=activePlayers().sort((a,b)=>a.name.localeCompare(b.name,'de'));
+  return`${subHdr('Spieler des Trainings')}
+  <div class="sub-content">
+    <div class="form-group">
+      <label class="form-label">Datum</label>
+      <input type="date" class="form-input" value="${tDate}" data-change="att-date" id="pot-date">
+    </div>
+    <p style="font-size:.85rem;color:var(--text-2);margin:0 0 12px">Wähle den Spieler des Trainings (+${rulePts('Spieler des Trainings',2)} Punkte)</p>
+    <div class="plist">
+    ${players.map(p=>`
+      <div class="select-row ${tSelPlayer===p.id?'selected':''}" data-action="sel-player" data-id="${p.id}">
+        <div class="radio ${tSelPlayer===p.id?'on':''}"></div>
+        <span class="pitem-name">${esc(p.name)}</span>
+        <span style="font-size:.8rem;color:var(--text-2)">${pts(p.id)} Pkt</span>
+      </div>`).join('')}
+    </div>
+  </div>
+  <div class="sub-footer">
+    <button type="button" class="btn btn-primary btn-block" data-action="save-pot" ${!tSelPlayer?'disabled':''}>
+      Spieler des Trainings vergeben</button>
+  </div>`}
+
+/* ── Single Points ── */
+function singleHtml(){
+  const players=activePlayers().sort((a,b)=>a.name.localeCompare(b.name,'de'));
+  const cat=MANUAL_CATS.find(c=>c.id===tCat)||MANUAL_CATS[0];
+  return`${subHdr('Einzelpunkte vergeben')}
+  <div class="sub-content">
+    <div class="form-group">
+      <label class="form-label">Datum</label>
+      <input type="date" class="form-input" value="${tDate}" data-change="att-date" id="single-date">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Spieler</label>
+      <select class="form-select" data-change="single-player" id="single-player">
+        <option value="">Spieler wählen...</option>
+        ${players.map(p=>`<option value="${p.id}" ${tSelPlayer===p.id?'selected':''}>${esc(p.name)}</option>`).join('')}
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Kategorie</label>
+      <select class="form-select" data-change="single-cat" id="single-cat">
+        ${MANUAL_CATS.map(c=>`<option value="${c.id}" ${tCat===c.id?'selected':''}>${c.name} (${c.pts>0?'+':''}${c.pts})</option>`).join('')}
+      </select>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Punkte</label>
+      <input type="number" class="form-input" value="${tPts}" data-change="single-pts" id="single-pts"
+        ${tCat!=='other'?'readonly':''} style="${tCat!=='other'?'opacity:.6':''}">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Kommentar (optional)</label>
+      <input type="text" class="form-input" value="${esc(tComment)}" data-change="single-comment"
+        id="single-comment" placeholder="z.B. Grund für Punkte">
+    </div>
+  </div>
+  <div class="sub-footer">
+    <button type="button" class="btn btn-primary btn-block" data-action="save-single" ${!tSelPlayer?'disabled':''}>
+      Punkte vergeben</button>
+  </div>`}
+
+/* ── Player Management ── */
+function playerMgmtHtml(){
+  const actv=S.players.filter(p=>p.active).sort((a,b)=>a.name.localeCompare(b.name,'de'));
+  const inactv=S.players.filter(p=>!p.active).sort((a,b)=>a.name.localeCompare(b.name,'de'));
+  return`${subHdr('Spieler verwalten')}
+  <div class="sub-content">
+    <div class="form-group" style="display:flex;gap:8px">
+      <input type="text" class="form-input" placeholder="Name des Spielers" id="add-name"
+        value="${esc(tNewName)}" data-change="add-name">
+      <button class="btn btn-primary" data-action="add-player" style="white-space:nowrap">${I.plus} Hinzufügen</button>
+    </div>
+    ${tEditId?`
+    <div class="info-card">
+      <h3>Name bearbeiten</h3>
+      <div style="display:flex;gap:8px">
+        <input type="text" class="form-input" value="${esc(tEditName)}" id="edit-name" data-change="edit-name">
+        <button class="btn btn-primary btn-sm" data-action="save-edit">OK</button>
+        <button class="btn btn-secondary btn-sm" data-action="cancel-edit">Abb.</button>
+      </div>
+    </div>`:''}
+    <div class="sec-heading">Aktiv (${actv.length})</div>
+    ${actv.map(p=>`
+    <div class="pm-item">
+      <span class="pm-name">${esc(p.name)}</span>
+      <span style="font-size:.8rem;color:var(--text-2)">${pts(p.id)} Pkt</span>
+      <div class="pm-actions">
+        <button class="pm-btn" data-action="edit-player" data-id="${p.id}">Bearb.</button>
+        <button class="pm-btn" data-action="deactivate-player" data-id="${p.id}">Deakt.</button>
+      </div>
+    </div>`).join('')}
+    ${inactv.length?`
+    <div class="sec-heading">Inaktiv (${inactv.length})</div>
+    ${inactv.map(p=>`
+    <div class="pm-item inactive">
+      <span class="pm-name">${esc(p.name)}</span>
+      <span style="font-size:.8rem;color:var(--text-2)">${pts(p.id)} Pkt</span>
+      <div class="pm-actions">
+        <button class="pm-btn" data-action="activate-player" data-id="${p.id}">Aktivieren</button>
+      </div>
+    </div>`).join('')}`:''}
+  </div>`}
+
+/* ── Monthly Bonus ── */
+function bonusHtml(){
+  const d=monthlyBonusData();
+  const qualNotDone=d.players.filter(p=>p.qualifies&&!p.done);
+  return`${subHdr('Monatsbonus')}
+  <div class="sub-content">
+    <div class="info-card">
+      <h3>${d.month} – ${d.total} Trainingseinheiten</h3>
+      <p style="font-size:.85rem;color:var(--text-2);margin:0">Spieler mit ≥80% Anwesenheit erhalten +3 Punkte</p>
+    </div>
+    ${!d.total?`<div class="empty"><p>Noch keine Anwesenheitsdaten für diesen Monat.</p></div>`:`
+    <div class="sec-heading">Spieler</div>
+    ${d.players.sort((a,b)=>b.rate-a.rate).map(p=>`
+      <div class="bonus-item ${p.qualifies?'qualifies':'not-qual'}">
+        <span class="pitem-name">${esc(p.name)}</span>
+        <span class="bonus-pct" style="color:${p.qualifies?'var(--green)':'var(--red)'}">${Math.round(p.rate*100)}%</span>
+        <span style="font-size:.75rem;color:var(--text-2)">${p.att}/${p.total}</span>
+        ${p.done?'<span class="bonus-done">Erhalten</span>':''}
+      </div>`).join('')}
+    `}
+  </div>
+  ${qualNotDone.length?`<div class="sub-footer">
+    <button class="btn btn-success btn-block" data-action="save-bonus">
+      Bonus an ${qualNotDone.length} Spieler vergeben (+3)</button>
+  </div>`:''}`}
+
+/* ── Weekly Theme ── */
+function themeHtml(){
+  return`${subHdr('Wochenthema setzen')}
+  <div class="sub-content">
+    ${S.weeklyTheme?`<div class="info-card"><h3>Aktuelles Thema</h3>
+      <p style="margin:0;font-weight:600">${esc(S.weeklyTheme)}</p>
+      <p style="margin:4px 0 0;font-size:.8rem;color:var(--text-2)">Seit ${fmtDate(S.weeklyThemeDate)}</p></div>`:''}
+    <div class="form-group">
+      <label class="form-label">Neues Thema</label>
+      <select class="form-select" data-change="theme-select" id="theme-select">
+        <option value="">Thema wählen...</option>
+        ${THEMES.map(t=>`<option value="${t}" ${tTheme===t?'selected':''}>${t}</option>`).join('')}
+        <option value="__custom__" ${tTheme==='__custom__'?'selected':''}>Eigenes Thema...</option>
+      </select>
+    </div>
+    ${tTheme==='__custom__'?`<div class="form-group">
+      <label class="form-label">Eigenes Thema</label>
+      <input type="text" class="form-input" value="${esc(tCustom)}" data-change="theme-custom"
+        id="theme-custom" placeholder="Thema eingeben...">
+    </div>`:''}
+  </div>
+  <div class="sub-footer">
+    <button type="button" class="btn btn-primary btn-block" data-action="save-theme"
+      ${!tTheme||(tTheme==='__custom__'&&!tCustom.trim())?'disabled':''}>Thema setzen</button>
+    ${S.weeklyTheme?`<button type="button" class="btn btn-secondary btn-block mt-2" data-action="clear-theme">Thema entfernen</button>`:''}
+  </div>`}
+
+/* ── Edit Rules (Trainer) ── */
+function ruleEditorHtml(){
+  return`<div class="info-card" id="rule-editor-form">
+    <h3>${tRuleEditId==='__new__'?'Neue Regel':'Regel bearbeiten'}</h3>
+    <div class="form-group">
+      <label class="form-label">Titel</label>
+      <input type="text" class="form-input" value="${esc(tRuleTitle)}" id="rule-title" data-change="rule-title" placeholder="z.B. Anwesenheit">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Beschreibung</label>
+      <input type="text" class="form-input" value="${esc(tRuleText)}" id="rule-text" data-change="rule-text" placeholder="z.B. +1 Punkt für Teilnahme">
+    </div>
+    ${tRulePts!==null?`<div class="form-group">
+      <label class="form-label">Punkte pro Vergabe</label>
+      <input type="number" class="form-input" value="${tRulePts}" id="rule-pts" data-change="rule-pts" min="0" style="width:100px">
+      <span style="font-size:.75rem;color:var(--text-2);margin-top:4px;display:block">Dieser Wert wird bei der Punktevergabe verwendet.</span>
+    </div>`:''}
+    <div class="btn-group">
+      <button type="button" class="btn btn-primary btn-sm" data-action="save-rule" ${!tRuleTitle.trim()||!tRuleText.trim()?'disabled':''}>Speichern</button>
+      <button type="button" class="btn btn-secondary btn-sm" data-action="cancel-rule">Abbrechen</button>
+    </div>
+  </div>`}
+
+function editRulesHtml(){
+  const rules=S.rules||[];
+  return`${subHdr('Regeln bearbeiten')}
+  <div class="sub-content">
+    <p style="font-size:.85rem;color:var(--text-2);margin:0 0 12px">Diese Regeln werden den Spielern im Tab „Regeln" angezeigt.</p>
+    ${rules.map((r,i)=>{
+      const isEditing=tRuleEditId===r.id;
+      return (isEditing?ruleEditorHtml():'') + `
+    <div class="rule-card ${ruleClass(r)} slide-up" ${isEditing?'style="opacity:.5;pointer-events:none"':''}>
+      <div class="flex-between">
+        <div style="flex:1"><div class="rule-title">${esc(r.title)}${typeof r.pts==='number'?` <span class="cat-badge cat-pos" style="font-size:.65rem;vertical-align:middle">${r.pts>0?'+':''}${r.pts} Pkt</span>`:''}</div>
+        <div class="rule-text">${esc(r.text)}</div></div>
+        <div class="pm-actions">
+          <button class="pm-btn" data-action="edit-rule" data-idx="${i}">Bearb.</button>
+          <button class="pm-btn" data-action="delete-rule" data-idx="${i}">Lösch.</button>
+          ${i>0?`<button class="pm-btn" data-action="move-rule-up" data-idx="${i}">▲</button>`:''}
+          ${i<rules.length-1?`<button class="pm-btn" data-action="move-rule-down" data-idx="${i}">▼</button>`:''}
+        </div>
+      </div>
+    </div>`}).join('')}
+    ${tRuleEditId==='__new__'?ruleEditorHtml():''}
+    ${!tRuleEditId?`<button class="btn btn-secondary btn-block mt-2" data-action="add-rule">${I.plus} Neue Regel hinzufügen</button>
+    <button class="btn btn-secondary btn-block mt-2" data-action="reset-rules" style="font-size:.8rem;color:var(--text-3)">Standardregeln wiederherstellen</button>`:''}
+  </div>`}
+
+/* ── Edit Milestones (Trainer) ── */
+function msEditorHtml(){
+  return`<div class="info-card" id="ms-editor-form">
+    <h3>Erfolg bearbeiten</h3>
+    <div class="form-group">
+      <label class="form-label">Titel</label>
+      <input type="text" class="form-input" value="${esc(tMsTitle)}" id="ms-edit-title" data-change="ms-edit-title" placeholder="z.B. Gold">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Punkte-Schwelle</label>
+      <input type="number" class="form-input" value="${tMsValue}" id="ms-edit-value" data-change="ms-edit-value" min="1">
+    </div>
+    <div class="btn-group">
+      <button class="btn btn-primary btn-sm" data-action="save-ms-edit" ${!tMsValue||parseInt(tMsValue)<=0?'disabled':''}>Speichern</button>
+      <button class="btn btn-secondary btn-sm" data-action="cancel-ms-edit">Abbrechen</button>
+    </div>
+  </div>`}
+function editMilestonesHtml(){
+  const ms=msSorted();
+  return`${subHdr('Erfolge bearbeiten')}
+  <div class="sub-content">
+    <p style="font-size:.85rem;color:var(--text-2);margin:0 0 12px">Erfolge werden in der Spieleransicht angezeigt. Spieler sehen ihren Fortschritt zu jedem Ziel.</p>
+    ${ms.map((m,i)=>{
+      const v=msVal(m);const title=typeof m==='object'?m.title||'':'';
+      const isEditing=tMsEditIdx===i;
+      return (isEditing?msEditorHtml():'') + `
+    <div class="ms-edit-item slide-up" ${isEditing?'style="opacity:.5;pointer-events:none"':''}>
+      <div style="flex:1"><div class="ms-edit-value">${title?esc(title)+' · ':''}<span style="font-weight:400;font-size:.9rem">${v} Punkte</span></div></div>
+      <div class="pm-actions">
+        <button class="pm-btn" data-action="edit-ms" data-idx="${i}" data-val="${v}">Bearb.</button>
+        <button class="pm-btn" data-action="delete-ms" data-idx="${i}" data-val="${v}">Lösch.</button>
+      </div>
+    </div>`}).join('')}
+    ${tMsEditIdx===null?`
+    <div class="info-card mt-2">
+      <h3>Neuer Erfolg</h3>
+      <div class="form-group">
+        <label class="form-label">Titel</label>
+        <input type="text" class="form-input" value="${esc(tNewMsTitle)}" id="new-ms-title" data-change="new-ms-title" placeholder="z.B. Diamant">
+      </div>
+      <div style="display:flex;gap:8px;align-items:end">
+        <div class="form-group" style="flex:1;margin-bottom:0">
+          <label class="form-label">Punkte</label>
+          <input type="number" class="form-input" value="${tNewMsValue}" id="new-ms-value" data-change="new-ms-value" min="1" placeholder="z.B. 150">
+        </div>
+        <button class="btn btn-primary" data-action="add-ms" ${!tNewMsValue||parseInt(tNewMsValue)<=0?'disabled':''} style="margin-bottom:0">${I.plus}</button>
+      </div>
+    </div>`:''}
+  </div>`}
+
+/* ── Training Log ── */
+function logHtml(){
+  const sessions=trainingSessions();
+  const total=sessions.length;
+  const visible=sessions.slice(0,tLogLimit);
+  const hasMore=total>tLogLimit;
+  return`${subHdr('Trainings-Log')}
+  <div class="sub-content">
+    ${!sessions.length?`<div class="empty"><p>Noch keine Einträge vorhanden.</p></div>`:''}
+    ${visible.map(s=>{
+      const open=!!tLogOpen[s.date];
+      const ptsSign=s.totalPts>=0?'+':'';
+      return`<div class="log-item" data-action="toggle-log" data-date="${s.date}">
+        <div class="log-header">
+          <span class="log-date">${fmtDate(s.date)}</span>
+          <span class="log-stats">${s.playerCount} Spieler · ${ptsSign}${s.totalPts} Pkt</span>
+        </div>
+        ${open?`<div class="log-details">
+          ${s.entries.sort((a,b)=>a.timestamp-b.timestamp).map(e=>{
+            const p=S.players.find(pl=>pl.id===e.playerId);
+            return`<div class="log-entry">
+              <span>${p?esc(p.name):'?'}: ${e.category}</span>
+              <span class="${e.points>0?'positive':e.points<0?'negative':'neutral'}">${e.points>0?'+':''}${e.points}</span>
+            </div>`}).join('')}
+        </div>`:''}</div>`}).join('')}
+    ${hasMore?`<button class="btn btn-secondary btn-block mt-2" data-action="log-more"
+      style="margin-top:.75rem">Mehr anzeigen (${total-tLogLimit} weitere)</button>`:''}
+  </div>`}
+
+/* ── PIN Change ── */
+function pinChangeHtml(){
+  return`${subHdr('PIN ändern')}
+  <div class="sub-content">
+    <div class="form-group">
+      <label class="form-label">Neuer PIN</label>
+      <input type="password" inputmode="numeric" class="form-input" maxlength="6" value="${tNewPin}"
+        data-change="new-pin" id="new-pin" placeholder="Neuer PIN">
+    </div>
+    <div class="form-group">
+      <label class="form-label">PIN bestätigen</label>
+      <input type="password" inputmode="numeric" class="form-input" maxlength="6" value="${tConfPin}"
+        data-change="conf-pin" id="conf-pin" placeholder="PIN wiederholen">
+    </div>
+  </div>
+  <div class="sub-footer">
+    <button type="button" class="btn btn-primary btn-block" data-action="save-pin"
+      ${!tNewPin||tNewPin!==tConfPin?'disabled':''}>PIN ändern</button>
+  </div>`}
+
+/* ── Data Export/Import ── */
+function dataHtml(){
+  return`${subHdr('Daten')}
+  <div class="sub-content">
+    <div class="info-card">
+      <h3>Statistik</h3>
+      <p style="margin:0;font-size:.85rem;color:var(--text-2)">
+        ${activePlayers().length} aktive Spieler ·
+        ${S.entries.length} Einträge ·
+        ${new Set(S.entries.map(e=>e.date)).size} Trainingstage
+      </p>
+    </div>
+    <div class="sec-heading">Export</div>
+    <button class="btn btn-secondary btn-block mb-2" data-action="export-csv">${I.download} Tabelle als CSV</button>
+    <button class="btn btn-secondary btn-block mb-2" data-action="export-json">${I.download} Alle Daten als JSON</button>
+    <div class="sec-heading">Import</div>
+    <button class="btn btn-secondary btn-block mb-2" data-action="trigger-import">${I.plus} JSON importieren</button>
+    <input type="file" accept=".json" id="import-file" data-change="import-json" style="display:none">
+    <p style="font-size:.8rem;color:var(--text-3);margin:0">Achtung: Import überschreibt alle vorhandenen Daten!</p>
+  </div>`}
+
+/* ── Undo ── */
+function undoHtml(){
+  if(!S.entries.length)return`${subHdr('Rückgängig')}
+    <div class="sub-content"><div class="empty"><p>Keine Einträge vorhanden.</p></div></div>`;
+  const last=S.entries[S.entries.length-1];
+  const bid=last.batchId;
+  const batch=S.entries.filter(e=>e.batchId===bid);
+  const players=batch.map(e=>{const p=S.players.find(pl=>pl.id===e.playerId);return p?p.name:'?'});
+  const uniqueNames=[...new Set(players)];
+  return`${subHdr('Rückgängig')}
+  <div class="sub-content">
+    <div class="confirm-box">
+      <p><strong>Letzte Aktion rückgängig machen?</strong></p>
+      <p style="font-size:.85rem">${batch.length} Eintrag/Einträge vom ${fmtDate(last.date)}</p>
+      <p style="font-size:.85rem">Spieler: ${uniqueNames.map(n=>esc(n)).join(', ')}</p>
+      <p style="font-size:.85rem">Kategorien: ${[...new Set(batch.map(e=>e.category))].join(', ')}</p>
+    </div>
+    <button class="btn btn-danger btn-block" data-action="confirm-undo">Rückgängig machen</button>
+  </div>`}
+
+/* ═══════════════════════════ EVENT HANDLING ═══════════════════════════ */
+function openScreen(screen){
+  UI.screen=screen;
+  /* reset temp state */
+  tAtt={};tFit={};tDate=today();tTeams={};tWinner=null;tSelPlayer=null;
+  tCat='attendance';tPts=1;tComment='';tNewName='';tEditId=null;tEditName='';
+  tTheme='';tCustom='';tNewPin='';tConfPin='';tLogOpen={};
+  tRuleEditId=null;tRuleTitle='';tRuleText='';tRulePts=null;tMsEditIdx=null;tMsValue='';tMsTitle='';tNewMsValue='';tNewMsTitle='';
+  tSearchFilter='';tLogLimit=20;
+  R();window.scrollTo(0,0);
+}
+
+app.addEventListener('click',e=>{
+  const el=e.target.closest('[data-action]');
+  if(!el||el.disabled)return;
+  const a=el.dataset.action;
+
+  try{ switch(a){
+    /* Navigation */
+    case'tab':UI.tab=el.dataset.tab;tFeedLimit=15;tDetailPlayer=null;R();window.scrollTo(0,0);break;
+    case'player-detail':tDetailPlayer=el.dataset.id;tDetailLimit=20;R();window.scrollTo(0,0);break;
+    case'close-detail':tDetailPlayer=null;R();window.scrollTo(0,0);break;
+    case'detail-more':tDetailLimit+=20;R();break;
+    case'sort':UI.sort=el.dataset.sort;R();break;
+    case'open-pin':{
+      if(isAuth()){UI.view='trainer';R();window.scrollTo(0,0);break}
+      UI.pinModal=true;R();break}
+    case'close-modal':closePinModal();break;
+    case'back-player':UI.view='player';UI.screen=null;R();window.scrollTo(0,0);break;
+    case'screen':openScreen(el.dataset.screen);break;
+    case'screen-back':UI.screen=null;R();window.scrollTo(0,0);break;
+
+    /* Attendance */
+    case'toggle-att':{const id=el.dataset.id;tAtt[id]=!tAtt[id];if(!tAtt[id])tFit[id]=false;R();break}
+    case'toggle-fit':{const id=el.dataset.id;tFit[id]=!tFit[id];R();break}
+    case'att-all':{const pl=activePlayers();const filtered=tSearchFilter?pl.filter(p=>p.name.toLowerCase().includes(tSearchFilter.toLowerCase())):pl;
+      filtered.forEach(p=>tAtt[p.id]=true);R();break}
+    case'att-none':{const pl=activePlayers();const filtered=tSearchFilter?pl.filter(p=>p.name.toLowerCase().includes(tSearchFilter.toLowerCase())):pl;
+      filtered.forEach(p=>{tAtt[p.id]=false;tFit[p.id]=false});R();break}
+    case'save-att':{
+      const list=[];
+      const dateStr=tDate||today();
+      const dupes=[];
+      const attPts=rulePts('Anwesenheit',1);
+      const fitPts=rulePts('Fitnesseinheit',1);
+      activePlayers().forEach(p=>{
+        if(tAtt[p.id]){
+          if(S.entries.some(e=>e.playerId===p.id&&e.category==='Anwesenheit'&&e.date===dateStr))dupes.push(p.name);
+          list.push({pid:p.id,pts:attPts,cat:'Anwesenheit'});
+          if(tFit[p.id])list.push({pid:p.id,pts:fitPts,cat:'Fitnesseinheit'})}
+      });
+      if(!list.length){toast('Keine Spieler ausgewählt','err');break}
+      if(dupes.length){toast(`Achtung: ${dupes.length} Spieler haben bereits Anwesenheit für ${fmtDate(dateStr)}`,'err');
+        if(el.dataset.confirmed!=='1'){el.dataset.confirmed='1';
+          el.textContent='Trotzdem speichern?';setTimeout(()=>{el.textContent=`Anwesenheit speichern (${list.filter(e=>e.cat==='Anwesenheit').length})`;delete el.dataset.confirmed},3000);break}}
+      addEntries(list);save();toast(`${list.length} Einträge gespeichert`);UI.screen=null;R();window.scrollTo(0,0);break}
+
+    /* Game Result */
+    case'set-team':{const id=el.dataset.id;tTeams[id]=el.dataset.team||null;R();break}
+    case'set-winner':tWinner=el.dataset.team;R();break;
+    case'save-game':{
+      const type=el.dataset.type;
+      const tA=activePlayers().filter(p=>tTeams[p.id]==='a');
+      const tB=activePlayers().filter(p=>tTeams[p.id]==='b');
+      if(!tA.length||!tB.length){toast('Beide Teams brauchen Spieler','err');break}
+      if(!tWinner){toast('Bitte Sieger wählen','err');break}
+      const list=[];
+      if(type==='game'){
+        const winPts=rulePts('Sieg Trainingsform',2);
+        const losePts=rulePts('Zweiter Platz Trainingsform',1);
+        if(tWinner==='draw'){
+          [...tA,...tB].forEach(p=>list.push({pid:p.id,pts:losePts,cat:'Zweiter Platz Trainingsform',comment:'Unentschieden'}))
+        }else{
+          const win=tWinner==='a'?tA:tB;const lose=tWinner==='a'?tB:tA;
+          win.forEach(p=>list.push({pid:p.id,pts:winPts,cat:'Sieg Trainingsform'}));
+          lose.forEach(p=>list.push({pid:p.id,pts:losePts,cat:'Zweiter Platz Trainingsform'}))
+        }
+      }else{
+        const finalPts=rulePts('Sieg Abschlussspiel',2);
+        const win=tWinner==='a'?tA:tB;
+        win.forEach(p=>list.push({pid:p.id,pts:finalPts,cat:'Sieg Abschlussspiel'}))
+      }
+      addEntries(list);save();toast(`${list.length} Punkte vergeben`);UI.screen=null;R();window.scrollTo(0,0);break}
+
+    /* Player of Training */
+    case'sel-player':tSelPlayer=el.dataset.id;R();break;
+    case'save-pot':{
+      if(!tSelPlayer){toast('Bitte Spieler wählen','err');break}
+      const potPts=rulePts('Spieler des Trainings',2);
+      addEntries([{pid:tSelPlayer,pts:potPts,cat:'Spieler des Trainings'}]);
+      save();const p=S.players.find(pl=>pl.id===tSelPlayer);
+      toast(`${p?p.name:'Spieler'}: +${potPts} Punkte`);UI.screen=null;R();window.scrollTo(0,0);break}
+
+    /* Single Points */
+    case'save-single':{
+      if(!tSelPlayer){toast('Bitte Spieler wählen','err');break}
+      if(tPts===0){toast('0 Punkte können nicht vergeben werden','err');break}
+      const cat=MANUAL_CATS.find(c=>c.id===tCat);
+      addEntries([{pid:tSelPlayer,pts:tPts,cat:cat?cat.name:'Sonstiges',comment:tComment}]);
+      save();toast('Punkte vergeben');UI.screen=null;R();window.scrollTo(0,0);break}
+
+    /* Player Management */
+    case'add-player':{
+      const inp=document.getElementById('add-name');
+      const name=(inp?inp.value:'').trim();
+      if(!name){toast('Bitte Name eingeben','err');break}
+      if(S.players.some(p=>p.name.toLowerCase()===name.toLowerCase())){toast('Spieler existiert bereits','err');break}
+      addPlayer(name);save();tNewName='';toast(`${name} hinzugefügt`);R();window.scrollTo(0,0);break}
+    case'edit-player':tEditId=el.dataset.id;tEditName=(S.players.find(p=>p.id===el.dataset.id)||{}).name||'';R();break;
+    case'save-edit':{
+      const inp=document.getElementById('edit-name');
+      const name=(inp?inp.value:'').trim();
+      if(!name){toast('Name darf nicht leer sein','err');break}
+      if(S.players.some(pl=>pl.id!==tEditId&&pl.name.toLowerCase()===name.toLowerCase())){toast('Name existiert bereits','err');break}
+      const p=S.players.find(pl=>pl.id===tEditId);if(p)p.name=name;
+      save();tEditId=null;tEditName='';toast('Name geändert');R();break}
+    case'cancel-edit':tEditId=null;tEditName='';R();break;
+    case'deactivate-player':{
+      const p=S.players.find(pl=>pl.id===el.dataset.id);
+      if(el.dataset.confirmed!=='1'){el.textContent='Sicher?';el.dataset.confirmed='1';
+        setTimeout(()=>{el.textContent='Deakt.';delete el.dataset.confirmed},2500);break}
+      if(p)p.active=false;
+      save();toast(`${p?p.name:'Spieler'} deaktiviert`);R();break}
+    case'activate-player':{
+      const p=S.players.find(pl=>pl.id===el.dataset.id);if(p)p.active=true;
+      save();toast(`${p?p.name:'Spieler'} aktiviert`);R();break}
+
+    /* Monthly Bonus */
+    case'save-bonus':{
+      const d=monthlyBonusData();
+      const qual=d.players.filter(p=>p.qualifies&&!p.done);
+      if(!qual.length){toast('Keine berechtigten Spieler','err');break}
+      const list=qual.map(p=>({pid:p.id,pts:3,cat:'Monatsbonus',comment:`${d.month} (≥ 80%)`}));
+      addEntries(list);save();toast(`Bonus an ${qual.length} Spieler vergeben`);R();break}
+
+    /* Weekly Theme */
+    case'save-theme':{
+      const theme=tTheme==='__custom__'?tCustom.trim():tTheme;
+      if(!theme){toast('Bitte Thema wählen','err');break}
+      S.weeklyTheme=theme;S.weeklyThemeDate=today();
+      save();toast('Wochenthema gesetzt');UI.screen=null;R();window.scrollTo(0,0);break}
+    case'clear-theme':S.weeklyTheme='';S.weeklyThemeDate='';save();toast('Wochenthema entfernt');R();break;
+
+    /* Rules Editor */
+    case'add-rule':tRuleEditId='__new__';tRuleTitle='';tRuleText='';tRulePts=null;R();break;
+    case'edit-rule':{
+      const idx=parseInt(el.dataset.idx);const r=S.rules[idx];
+      if(r){tRuleEditId=r.id;tRuleTitle=r.title;tRuleText=r.text;tRulePts=typeof r.pts==='number'?r.pts:null}R();
+      setTimeout(()=>{const f=document.getElementById('rule-editor-form');if(f)f.scrollIntoView({behavior:'smooth',block:'center'})},50);break}
+    case'cancel-rule':tRuleEditId=null;tRuleTitle='';tRuleText='';tRulePts=null;R();break;
+    case'save-rule':{
+      if(!tRuleTitle.trim()||!tRuleText.trim()){toast('Titel und Text benötigt','err');break}
+      if(tRuleEditId==='__new__'){
+        const newRule={id:uid(),title:tRuleTitle.trim(),text:tRuleText.trim()};
+        if(tRulePts!==null)newRule.pts=tRulePts;
+        S.rules.push(newRule)
+      }else{
+        const r=S.rules.find(r=>r.id===tRuleEditId);
+        if(r){r.title=tRuleTitle.trim();r.text=tRuleText.trim();if(tRulePts!==null)r.pts=tRulePts}
+      }
+      tRuleEditId=null;tRuleTitle='';tRuleText='';tRulePts=null;save();toast('Regel gespeichert');R();break}
+    case'delete-rule':{
+      const idx=parseInt(el.dataset.idx);
+      if(idx>=0&&idx<S.rules.length){
+        if(el.dataset.confirmed!=='1'){el.textContent='Sicher?';el.dataset.confirmed='1';
+          setTimeout(()=>{el.textContent='Lösch.';delete el.dataset.confirmed},2500);break}
+        S.rules.splice(idx,1);save();toast('Regel gelöscht');R()}break}
+    case'move-rule-up':{
+      const idx=parseInt(el.dataset.idx);
+      if(idx>0){[S.rules[idx-1],S.rules[idx]]=[S.rules[idx],S.rules[idx-1]];save();R()}break}
+    case'move-rule-down':{
+      const idx=parseInt(el.dataset.idx);
+      if(idx<S.rules.length-1){[S.rules[idx],S.rules[idx+1]]=[S.rules[idx+1],S.rules[idx]];save();R()}break}
+
+    case'reset-rules':{
+      if(el.dataset.confirmed!=='1'){el.textContent='Wirklich zurücksetzen?';el.dataset.confirmed='1';
+        setTimeout(()=>{el.textContent='Standardregeln wiederherstellen';delete el.dataset.confirmed},2500);break}
+      S.rules=DEFAULT_RULES.map(r=>({...r}));save();toast('Standardregeln wiederhergestellt');R();break}
+
+    /* Milestones Editor */
+    case'edit-ms':{
+      const idx=parseInt(el.dataset.idx);const sorted=msSorted();const m=sorted[idx];
+      tMsEditIdx=idx;tMsValue=String(msVal(m));tMsTitle=typeof m==='object'&&m.title?m.title:'';R();
+      setTimeout(()=>{const f=document.getElementById('ms-editor-form');if(f)f.scrollIntoView({behavior:'smooth',block:'center'})},50);break}
+    case'cancel-ms-edit':tMsEditIdx=null;tMsValue='';tMsTitle='';R();break;
+    case'save-ms-edit':{
+      const newVal=parseInt(tMsValue);
+      if(!newVal||newVal<=0){toast('Ungültiger Wert','err');break}
+      const sorted=msSorted();const oldM=sorted[tMsEditIdx];
+      const realIdx=S.milestones.indexOf(oldM);
+      if(realIdx>=0){
+        if(S.milestones.some((m,i)=>msVal(m)===newVal&&i!==realIdx)){toast('Erfolg existiert bereits','err');break}
+        S.milestones[realIdx]={value:newVal,title:tMsTitle.trim()};
+      }
+      tMsEditIdx=null;tMsValue='';tMsTitle='';save();toast('Erfolg geändert');R();break}
+    case'delete-ms':{
+      const val=parseInt(el.dataset.val);
+      if(el.dataset.confirmed!=='1'){el.textContent='Sicher?';el.dataset.confirmed='1';
+        setTimeout(()=>{el.textContent='Lösch.';delete el.dataset.confirmed},2500);break}
+      S.milestones=S.milestones.filter(m=>msVal(m)!==val);
+      save();toast('Erfolg gelöscht');R();break}
+    case'add-ms':{
+      const val=parseInt(tNewMsValue);
+      if(!val||val<=0){toast('Ungültiger Wert','err');break}
+      if(S.milestones.some(m=>msVal(m)===val)){toast('Erfolg existiert bereits','err');break}
+      S.milestones.push({value:val,title:tNewMsTitle.trim()});tNewMsValue='';tNewMsTitle='';
+      save();toast(`Erfolg ${val} hinzugefügt`);R();break}
+
+    /* Feed & Log */
+    case'feed-more':tFeedLimit+=20;R();break;
+    case'log-more':tLogLimit+=20;R();break;
+    case'toggle-log':tLogOpen[el.dataset.date]=!tLogOpen[el.dataset.date];R();break;
+
+    /* PIN Change */
+    case'save-pin':{
+      if(!tNewPin||tNewPin!==tConfPin){toast('PINs stimmen nicht überein','err');break}
+      S.pin=tNewPin;save();toast('PIN geändert');UI.screen=null;R();window.scrollTo(0,0);break}
+
+    /* Data */
+    case'export-csv':exportCsv();break;
+    case'export-json':exportJson();break;
+    case'trigger-import':{
+      if(el.dataset.confirmed!=='1'){el.textContent='Wirklich importieren? Daten werden überschrieben!';
+        el.style.color='var(--red)';el.dataset.confirmed='1';
+        setTimeout(()=>{el.innerHTML=`${I.plus} JSON importieren`;el.style.color='';delete el.dataset.confirmed},3000);break}
+      document.getElementById('import-file')?.click();break}
+    case'confirm-undo':{
+      const count=undoLast();if(count===false){toast('Nichts zum Rückgängig machen','err');break}
+      save();toast(`${count} Einträge rückgängig gemacht`);UI.screen=null;R();window.scrollTo(0,0);break}
+  }
+  }catch(err){console.error('Action error:',a,err);toast('Fehler: '+err.message,'err')}
+});
+
+app.addEventListener('change',e=>{
+  const el=e.target.closest('[data-change]');
+  if(!el)return;
+  switch(el.dataset.change){
+    case'att-date':tDate=el.value;break;
+    case'single-player':tSelPlayer=el.value||null;R();break;
+    case'single-cat':{
+      tCat=el.value;const cat=MANUAL_CATS.find(c=>c.id===tCat);
+      tPts=cat?cat.pts:0;R();break}
+    case'single-pts':tPts=parseInt(el.value)||0;break;
+    case'single-comment':tComment=el.value;break;
+    case'add-name':tNewName=el.value;break;
+    case'edit-name':tEditName=el.value;break;
+    case'theme-select':tTheme=el.value;R();break;
+    case'theme-custom':tCustom=el.value;R();break;
+    case'new-pin':tNewPin=el.value;R();break;
+    case'conf-pin':tConfPin=el.value;R();break;
+    case'rule-title':tRuleTitle=el.value;updateBtnState();break;
+    case'rule-text':tRuleText=el.value;updateBtnState();break;
+    case'rule-pts':tRulePts=parseInt(el.value)||0;break;
+    case'ms-edit-value':tMsValue=el.value;updateBtnState();break;
+    case'ms-edit-title':tMsTitle=el.value;break;
+    case'new-ms-value':tNewMsValue=el.value;updateBtnState();break;
+    case'new-ms-title':tNewMsTitle=el.value;break;
+    case'search-filter':tSearchFilter=el.value;updateFilteredList();break;
+    case'import-json':{
+      const file=el.files?.[0];if(!file)break;
+      const reader=new FileReader();
+      reader.onload=async ev=>{
+        try{S=migrate(JSON.parse(ev.target.result));await save();R();toast('Daten importiert')}
+        catch(err){toast('Ungültige Datei','err')}};
+      reader.readAsText(file);break}
+  }
+});
+
+app.addEventListener('input',e=>{
+  const el=e.target.closest('[data-change]');
+  if(!el)return;
+  switch(el.dataset.change){
+    case'add-name':tNewName=el.value;break;
+    case'edit-name':tEditName=el.value;break;
+    case'single-comment':tComment=el.value;break;
+    case'single-pts':tPts=parseInt(el.value)||0;break;
+    case'new-pin':tNewPin=el.value;break;
+    case'conf-pin':tConfPin=el.value;break;
+    case'theme-custom':tCustom=el.value;break;
+    case'rule-title':tRuleTitle=el.value;updateBtnState();break;
+    case'rule-text':tRuleText=el.value;updateBtnState();break;
+    case'rule-pts':tRulePts=parseInt(el.value)||0;break;
+    case'ms-edit-value':tMsValue=el.value;updateBtnState();break;
+    case'ms-edit-title':tMsTitle=el.value;break;
+    case'new-ms-value':tNewMsValue=el.value;updateBtnState();break;
+    case'new-ms-title':tNewMsTitle=el.value;break;
+    case'search-filter':tSearchFilter=el.value;updateFilteredList();break;
+  }
+});
+
+app.addEventListener('keydown',e=>{
+  if(e.key==='Enter'){
+    if(e.target.id==='add-name'){app.querySelector('[data-action="add-player"]')?.click();e.preventDefault()}
+    if(e.target.id==='edit-name'){app.querySelector('[data-action="save-edit"]')?.click();e.preventDefault()}
+  }
+});
+
+function handlePinSubmit(){
+  const inp=document.getElementById('pin-input');
+  if(inp&&inp.value===S.pin){UI.auth=true;UI.authAt=Date.now();UI.view='trainer';UI.pinModal=false;R()}
+  else{toast('Falscher PIN','err');if(inp)inp.value=''}
+}
+
+/* ═══════════════════════════ EXPORT ═══════════════════════════ */
+async function exportCsv(){
+  const players=sortedPlayers();
+  const ms=monthStr();
+  const totalDates=new Set(S.entries.filter(e=>e.category==='Anwesenheit'&&e.date.startsWith(ms)).map(e=>e.date)).size;
+  let csv=`﻿Rang;Name;Punkte;Anwesenheit;7-Tage-Änderung;Quote ${monthName()} (%)\n`;
+  const csvField=v=>/[;"\n]/.test(v)?`"${v.replace(/"/g,'""')}"`:v;
+  players.forEach((p,i)=>{
+    const mAtt=attCount(p.id,ms);
+    const pct=totalDates?Math.round((mAtt/totalDates)*100):'–';
+    csv+=`${i+1};${csvField(p.name)};${p.points};${p.att};${p.delta>0?'+':''}${p.delta};${pct}\n`});
+  await offerDownload('trainingsliga.csv',csv);
+}
+
+async function exportJson(){
+  const data=JSON.stringify(S,null,2);
+  await offerDownload('trainingsliga.json',data);
+}
+
+async function offerDownload(filename,data){
+  try{
+    const blob=new Blob([data],{type:'text/plain'});
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement('a');a.href=url;a.download=filename;
+    document.body.appendChild(a);a.click();document.body.removeChild(a);
+    URL.revokeObjectURL(url);toast('Heruntergeladen');
+  }catch(e){toast('Download fehlgeschlagen','err')}
+}
+
+/* ═══════════════════════════ TOAST ═══════════════════════════ */
+function toast(msg,type='ok'){
+  const wrap=document.getElementById('toast-wrap');
+  const el=document.createElement('div');
+  el.className=`toast toast-${type}`;el.textContent=msg;
+  wrap.appendChild(el);
+  requestAnimationFrame(()=>requestAnimationFrame(()=>el.classList.add('show')));
+  setTimeout(()=>{el.classList.remove('show');setTimeout(()=>el.remove(),300)},2200);
+}
+
+/* ═══════════════════════════ INIT ═══════════════════════════ */
+(async()=>{
+  await initFirebase();
+  await load();
+  R();
+})();
+</script>
+</body>
+</html>
