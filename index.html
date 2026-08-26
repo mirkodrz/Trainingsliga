@@ -99,6 +99,9 @@ body{background:var(--bg);color:var(--text);font-family:var(--font-b);margin:0;p
 .rank-medal{display:inline-block;width:22px;height:22px;border-radius:50%;text-align:center;
   line-height:22px;font-size:.7rem;font-weight:700;color:#fff}
 .medal-1{background:var(--gold)}.medal-2{background:var(--silver)}.medal-3{background:var(--bronze)}
+.streak-badge{display:inline-flex;align-items:center;gap:1px;padding:1px 5px;border-radius:8px;
+  font-size:.65rem;font-weight:700;font-family:var(--font-d);background:var(--gold-s);color:var(--gold);
+  white-space:nowrap;vertical-align:middle;margin-left:4px;letter-spacing:.01em}
 
 /* ── Activity Feed ── */
 .feed{padding:8px 14px}
@@ -198,10 +201,6 @@ body{background:var(--bg);color:var(--text);font-family:var(--font-b);margin:0;p
   align-items:center;justify-content:center;flex-shrink:0;transition:all .15s;background:var(--card)}
 .checkbox.on{background:var(--green);border-color:var(--green);color:#fff}
 .checkbox svg{width:14px;height:14px}
-.fitness-badge{padding:3px 8px;border-radius:12px;font-size:.7rem;font-weight:600;
-  text-transform:uppercase;letter-spacing:.03em;cursor:pointer;transition:all .15s;
-  border:1px solid var(--border);color:var(--text-2);background:var(--bg)}
-.fitness-badge.on{background:var(--primary-s);border-color:var(--primary-l);color:var(--primary)}
 
 /* ── Team Selection ── */
 .team-row{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--border)}
@@ -359,6 +358,7 @@ const CATS=[
   {id:'win_training',name:'Sieg Trainingsform',pts:2},
   {id:'second_training',name:'Zweiter Platz Trainingsform',pts:1},
   {id:'win_final',name:'Sieg Abschlussspiel',pts:2},
+  {id:'draw_final',name:'Unentschieden Abschlussspiel',pts:1},
   {id:'pot',name:'Spieler des Trainings',pts:2},
   {id:'effort',name:'Besondere Einsatzbereitschaft',pts:1},
   {id:'unsportsmanlike',name:'Unsportliches Verhalten',pts:-3},
@@ -369,7 +369,7 @@ const CATS=[
   {id:'starting',name:'Startbonus',pts:0},
   {id:'other',name:'Sonstiges',pts:0}
 ];
-const MANUAL_CATS=CATS.filter(c=>!['win_training','second_training','win_final','pot','monthly_bonus','starting'].includes(c.id));
+const MANUAL_CATS=CATS.filter(c=>!['attendance','win_training','second_training','win_final','draw_final','pot','monthly_bonus','starting'].includes(c.id));
 const THEMES=['Kopfballkönig','Assist-König','Tackling-Monster','Mentalitäts-Monster',
   'Passsicherheit','Dauerbrenner','Elfmeterkönig','Teamplayer'];
 const DEFAULT_MILESTONES=[{value:25,title:'Bronze'},{value:50,title:'Silber'},{value:75,title:'Gold'},{value:100,title:'Legende'}];
@@ -379,6 +379,7 @@ const DEFAULT_RULES=[
   {id:'r3',title:'Sieg Trainingsform',text:'+2 Punkte für das Gewinnerteam',pts:2},
   {id:'r4',title:'Zweiter Platz Trainingsform',text:'+1 Punkt für das Verliererteam (bei Unentschieden alle +1)',pts:1},
   {id:'r5',title:'Sieg Abschlussspiel',text:'+2 Punkte für das Gewinnerteam',pts:2},
+  {id:'r5b',title:'Unentschieden Abschlussspiel',text:'+1 Punkt für beide Teams bei Unentschieden',pts:1},
   {id:'r6',title:'Spieler des Trainings',text:'+2 Punkte – vom Trainer gewählt',pts:2},
   {id:'r7',title:'Wochenthema erfüllt',text:'+2 Punkte für besondere Leistung im Wochenthema'},
   {id:'r8',title:'Challenge-Sieger',text:'+2 Punkte für den Gewinner einer Challenge'},
@@ -387,6 +388,8 @@ const DEFAULT_RULES=[
   {id:'r11',title:'Unsportliches Verhalten',text:'-3 Punkte bei Unsportlichkeit oder Respektlosigkeit'},
   {id:'r12',title:'Unentschuldigtes Fehlen',text:'-2 Punkte bei Fehlen ohne Absage'},
   {id:'r13',title:'Startbonus',text:'Neue Spieler starten mit dem aktuellen Kaderdurchschnitt'},
+  {id:'r_streak_thr',title:'Streak-Schwelle',text:'Anzahl aufeinanderfolgender Trainings für Streak-Aktivierung',pts:5},
+  {id:'r_streak_bon',title:'Streak-Bonus',text:'Anwesenheitspunkte pro Training bei aktiver Streak (statt normal)',pts:3},
   {id:'r14',title:'Allgemeine Regeln',text:'Punkte können nie unter 0 fallen. Bei Punktegleichstand entscheidet die Anwesenheit.'}
 ];
 const MONTHS=['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
@@ -429,8 +432,8 @@ const FB_DOC = 'trainingsliga/data';
 let fbReady=false,fbDb=null,fbSaving=false;
 
 /* temp screen state */
-let tAtt={},tFit={},tDate='',tTeams={},tWinner=null,tSelPlayer=null;
-let tCat='attendance',tPts=1,tComment='',tNewName='',tEditId=null,tEditName='';
+let tAtt={},tDate='',tTeams={},tWinner=null,tSelPlayer=null;
+let tCat='fitness',tPts=1,tComment='',tCustomCat='',tSingleSel={},tNewName='',tEditId=null,tEditName='';
 let tTheme='',tCustom='',tNewPin='',tConfPin='',tLogOpen={};
 let tRuleEditId=null,tRuleTitle='',tRuleText='',tRulePts=null,tMsEditIdx=null,tMsValue='',tMsTitle='',tNewMsValue='',tNewMsTitle='';
 
@@ -443,6 +446,10 @@ function migrate(d){
     if(typeof r.pts==='number')return r;
     const def=DEFAULT_RULES.find(dr=>dr.title===r.title);
     return def&&typeof def.pts==='number'?{...r,pts:def.pts}:r;
+  });
+  /* add any new default rules not yet present (e.g. Streak rules) */
+  DEFAULT_RULES.forEach(dr=>{
+    if(!rules.some(r=>r.id===dr.id||r.title===dr.title)){rules.push({...dr})}
   });
   return{players:d.players||[],entries:d.entries||[],
   weeklyTheme:d.weeklyTheme||'',weeklyThemeDate:d.weeklyThemeDate||'',pin:d.pin||'1234',
@@ -521,6 +528,20 @@ function weekDelta(pid){const now=Date.now(),wa=now-7*864e5;return pts(pid)-ptsA
 function attCount(pid,ms){
   return S.entries.filter(e=>e.playerId===pid&&e.category==='Anwesenheit'&&(!ms||e.date.startsWith(ms))).length}
 
+function getStreak(pid){
+  /* Alle Trainingstage = Daten mit mindestens einem Anwesenheits-Eintrag */
+  const trainingDates=[...new Set(S.entries.filter(e=>e.category==='Anwesenheit').map(e=>e.date))].sort().reverse();
+  let streak=0;
+  for(const date of trainingDates){
+    if(S.entries.some(e=>e.playerId===pid&&e.category==='Anwesenheit'&&e.date===date)){streak++}
+    else break;
+  }
+  return streak;
+}
+
+function streakThreshold(){return rulePts('Streak-Schwelle',5)}
+function streakBonus(){return rulePts('Streak-Bonus',3)}
+function isStreakActive(pid){return getStreak(pid)>=streakThreshold()}
 
 function rulePts(title,fallback){
   const rule=(S.rules||[]).find(r=>r.title===title);
@@ -531,7 +552,7 @@ function avgPts(){const ap=activePlayers();if(!ap.length)return 0;
   return Math.round(ap.reduce((s,p)=>s+pts(p.id),0)/ap.length)}
 
 function sortedPlayers(){
-  const ap=activePlayers().map(p=>({...p,points:pts(p.id),delta:weekDelta(p.id),att:attCount(p.id)}));
+  const ap=activePlayers().map(p=>({...p,points:pts(p.id),delta:weekDelta(p.id),att:attCount(p.id),streak:getStreak(p.id)}));
   if(UI.sort==='name')ap.sort((a,b)=>a.name.localeCompare(b.name,'de'));
   else if(UI.sort==='change')ap.sort((a,b)=>b.delta-a.delta||b.points-a.points||b.att-a.att);
   else ap.sort((a,b)=>b.points-a.points||b.att-a.att);
@@ -622,7 +643,8 @@ function updateFilteredList(){
   if(!plist)return;
   const allPlayers=activePlayers().sort((a,b)=>a.name.localeCompare(b.name,'de'));
   const players=tSearchFilter?allPlayers.filter(p=>p.name.toLowerCase().includes(tSearchFilter.toLowerCase())):allPlayers;
-  /* Detect context: attendance vs game */
+  /* Detect context: single-points vs game vs attendance */
+  const isSingle=UI.screen==='single';
   const isGame=!!app.querySelector('.team-row');
   if(isGame){
     plist.innerHTML=players.map(p=>{
@@ -635,13 +657,22 @@ function updateFilteredList(){
           <button class="team-btn ${!t?'tn':''}" data-action="set-team" data-id="${p.id}" data-team="">—</button>
         </div>
       </div>`}).join('');
-  }else{
+  }else if(isSingle){
     plist.innerHTML=players.map(p=>{
-      const on=!!tAtt[p.id];const fit=!!tFit[p.id];
+      const on=!!tSingleSel[p.id];
+      return`<div class="pitem ${on?'checked':''}" data-action="toggle-single" data-id="${p.id}">
+        <div class="checkbox ${on?'on':''}">${on?I.check:''}</div>
+        <span class="pitem-name">${esc(p.name)}</span>
+      </div>`}).join('');
+  }else{
+    const sThr=streakThreshold();
+    plist.innerHTML=players.map(p=>{
+      const on=!!tAtt[p.id];const sk=getStreak(p.id);
+      const skHtml=sk>0?`<span class="pitem-extra">${sk>=sThr?'<span class="streak-badge">\u{1F525}'+sk+'</span>':'<span style="color:var(--text-3);font-size:.7rem">\u{1F525}'+sk+'/'+sThr+'</span>'}</span>`:'';
       return`<div class="pitem ${on?'checked':''}" data-action="toggle-att" data-id="${p.id}">
         <div class="checkbox ${on?'on':''}">${on?I.check:''}</div>
         <span class="pitem-name">${esc(p.name)}</span>
-        ${on?`<span class="fitness-badge ${fit?'on':''}" data-action="toggle-fit" data-id="${p.id}" onclick="event.stopPropagation()">Fitness${fit?' +1':''}</span>`:''}
+        ${skHtml}
       </div>`}).join('');
   }
 }
@@ -694,9 +725,11 @@ function tableHtml(){
       const changeClass=p.delta>0?'positive':p.delta<0?'negative':'neutral';
       const arrow=p.delta>0?'▲':p.delta<0?'▼':'▬';
       const medal=i<3?`<span class="rank-medal medal-${i+1}">${i+1}</span>`:`${i+1}`;
+      const sThr=streakThreshold();
+      const streakHtml=p.streak>=sThr?`<span class="streak-badge">\u{1F525}${p.streak}</span>`:'';
       return`<tr class="slide-up" style="animation-delay:${i*30}ms" data-action="player-detail" data-id="${p.id}">
         <td class="col-rank">${medal}</td>
-        <td class="col-name">${esc(p.name)}</td>
+        <td class="col-name">${esc(p.name)}${streakHtml}</td>
         <td class="col-pts">${p.points}</td>
         <td class="col-chg ${changeClass}"><span>${arrow}</span> ${p.delta>0?'+':''}${p.delta}</td>
         <td class="col-arr">›</td>
@@ -754,6 +787,7 @@ function playerDetailHtml(){
   const myAtt=attCount(p.id,ms);
   const attPct=totalTrainings?Math.round((myAtt/totalTrainings)*100):0;
   const totalAtt=attCount(p.id);
+  const streak=getStreak(p.id);const sThr=streakThreshold();const sActive=streak>=sThr;
   const entries=S.entries.filter(e=>e.playerId===p.id).sort((a,b)=>b.timestamp-a.timestamp);
   const visible=entries.slice(0,tDetailLimit);
   const hasMore=entries.length>tDetailLimit;
@@ -767,9 +801,10 @@ function playerDetailHtml(){
       <div class="pd-stat"><div class="pd-stat-val">${points}</div><div class="pd-stat-lbl">Punkte</div></div>
       <div class="pd-stat"><div class="pd-stat-val ${delta>0?'positive':delta<0?'negative':''}">${delta>0?'+':''}${delta}</div><div class="pd-stat-lbl">7 Tage</div></div>
     </div>
-    <div class="pd-stats" style="grid-template-columns:1fr 1fr">
+    <div class="pd-stats" style="grid-template-columns:1fr 1fr 1fr">
       <div class="pd-stat"><div class="pd-stat-val">${totalAtt}</div><div class="pd-stat-lbl">Anwesenheit</div></div>
       <div class="pd-stat"><div class="pd-stat-val" style="color:${attPct>=80?'var(--green)':attPct>0?'var(--red)':'var(--text)'}">${totalTrainings?attPct+'%':'–'}</div><div class="pd-stat-lbl">${monthName()} (${myAtt}/${totalTrainings})</div></div>
+      <div class="pd-stat"><div class="pd-stat-val" style="color:${sActive?'var(--gold)':'var(--text)'}">${streak>0?'\u{1F525}'+streak:'–'}</div><div class="pd-stat-lbl">Streak${sActive?' aktiv':''}</div></div>
     </div>
     <div class="sec-heading">Punktehistorie (${entries.length})</div>
     ${!entries.length?`<div class="empty" style="padding:20px"><p>Noch keine Einträge</p></div>`:`
@@ -793,12 +828,19 @@ function ruleClass(r){
 }
 function rulesHtml(){
   const rules=S.rules&&S.rules.length?S.rules:DEFAULT_RULES;
-  if(!rules.length)return`<div class="empty slide-up"><div class="empty-title">Keine Regeln hinterlegt</div></div>`;
-  return`<div class="rules">${rules.map(r=>`
+  /* Filter streak config rules from player view — replace with readable explanation */
+  const visible=rules.filter(r=>r.id!=='r_streak_thr'&&r.id!=='r_streak_bon');
+  if(!visible.length)return`<div class="empty slide-up"><div class="empty-title">Keine Regeln hinterlegt</div></div>`;
+  const sThr=streakThreshold();const sBon=streakBonus();
+  const streakCard=`<div class="rule-card rule-info slide-up">
+    <div class="rule-title">\u{1F525} Streak-Bonus</div>
+    <div class="rule-text">Nach ${sThr} Trainings in Folge gibt Anwesenheit +${sBon} statt +${rulePts('Anwesenheit',1)} Punkt${rulePts('Anwesenheit',1)!==1?'e':''} – solange die Serie hält.</div>
+  </div>`;
+  return`<div class="rules">${visible.map(r=>`
     <div class="rule-card ${ruleClass(r)} slide-up">
       <div class="rule-title">${esc(r.title)}</div>
       <div class="rule-text">${esc(r.text)}</div>
-    </div>`).join('')}</div>`}
+    </div>`).join('')}${streakCard}</div>`}
 
 /* ── PIN Modal ── */
 function pinModalHtml(){
@@ -836,7 +878,7 @@ function trainerMenuHtml(){
       {id:'game',icon:I.shield,label:'Spielform'},
       {id:'final',icon:I.goal,label:'Abschlussspiel'},
       {id:'pot',icon:I.star,label:'Spieler d. Trainings'},
-      {id:'single',icon:I.target,label:'Einzelpunkte'},
+      {id:'single',icon:I.target,label:'Punkte vergeben'},
       {id:'bonus',icon:I.trophy,label:'Monatsbonus'}
     ]},
     {title:'Verwaltung',cards:[
@@ -904,16 +946,26 @@ function attendanceHtml(){
       </div>
     </div>
     <div class="plist">
-    ${players.map(p=>{
-      const on=!!tAtt[p.id];const fit=!!tFit[p.id];
+    ${(()=>{const sThr=streakThreshold();return players.map(p=>{
+      const on=!!tAtt[p.id];const sk=getStreak(p.id);
+      const skHtml=sk>0?`<span class="pitem-extra">${sk>=sThr?'<span class="streak-badge">\u{1F525}'+sk+'</span>':'<span style="color:var(--text-3);font-size:.7rem">\u{1F525}'+sk+'/'+sThr+'</span>'}</span>`:'';
       return`<div class="pitem ${on?'checked':''}" data-action="toggle-att" data-id="${p.id}">
         <div class="checkbox ${on?'on':''}">${on?I.check:''}</div>
         <span class="pitem-name">${esc(p.name)}</span>
-        ${on?`<span class="fitness-badge ${fit?'on':''}" data-action="toggle-fit" data-id="${p.id}" onclick="event.stopPropagation()">Fitness${fit?' +'+rulePts('Fitnesseinheit',1):''}</span>`:''}
-      </div>`}).join('')}
+        ${skHtml}
+      </div>`}).join('')})()}
     </div>
     <div class="info-card" style="font-size:.8rem;color:var(--text-2);margin-top:12px">
-      Anwesenheit: +${rulePts('Anwesenheit',1)} · Fitness: +${rulePts('Fitnesseinheit',1)} <span style="color:var(--text-3)">(änderbar unter Regeln)</span>
+      Anwesenheit: +${rulePts('Anwesenheit',1)} <span style="color:var(--text-3)">(änderbar unter Regeln)</span>
+      ${(()=>{
+        const sThr=streakThreshold();const sBon=streakBonus();
+        const active=allPlayers.filter(p=>tAtt[p.id]&&isStreakActive(p.id));
+        const close=allPlayers.filter(p=>tAtt[p.id]&&!isStreakActive(p.id)&&getStreak(p.id)>=sThr-2&&getStreak(p.id)>0);
+        let s='<br>\u{1F525} Streak: ab '+sThr+' Trainings → +'+sBon+' statt +'+rulePts('Anwesenheit',1);
+        if(active.length)s+='<br><span style="color:var(--gold)">'+active.length+' Spieler mit aktiver Streak</span>';
+        if(close.length)s+='<br><span style="color:var(--text-3)">'+close.length+' Spieler kurz vor Streak</span>';
+        return s;
+      })()}
     </div>
   </div>
   <div class="sub-footer">
@@ -954,12 +1006,12 @@ function gameHtml(type){
       <div class="winner-btns">
         <button class="btn ${tWinner==='a'?'btn-primary':'btn-secondary'}" data-action="set-winner" data-team="a">Team A</button>
         <button class="btn ${tWinner==='b'?'btn-primary':'btn-secondary'}" data-action="set-winner" data-team="b">Team B</button>
-        ${type==='game'?`<button class="btn ${tWinner==='draw'?'btn-primary':'btn-secondary'}" data-action="set-winner" data-team="draw">Unent.</button>`:''}
+        <button class="btn ${tWinner==='draw'?'btn-primary':'btn-secondary'}" data-action="set-winner" data-team="draw">Unent.</button>
       </div>
     </div>
     <div class="info-card" style="font-size:.8rem;color:var(--text-2)">
       ${type==='game'?`Sieger: +${rulePts('Sieg Trainingsform',2)} (Sieg Trainingsform) · Verlierer: +${rulePts('Zweiter Platz Trainingsform',1)} (Zweiter Platz) · Unentschieden: alle +${rulePts('Zweiter Platz Trainingsform',1)}`
-        :`Sieger: +${rulePts('Sieg Abschlussspiel',2)} (Sieg Abschlussspiel)`}
+        :`Sieger: +${rulePts('Sieg Abschlussspiel',2)} (Sieg Abschlussspiel) · Unentschieden: alle +${rulePts('Unentschieden Abschlussspiel',1)}`}
     </div>
   </div>
   <div class="sub-footer">
@@ -993,20 +1045,16 @@ function potHtml(){
 
 /* ── Single Points ── */
 function singleHtml(){
-  const players=activePlayers().sort((a,b)=>a.name.localeCompare(b.name,'de'));
+  const allPlayers=activePlayers().sort((a,b)=>a.name.localeCompare(b.name,'de'));
+  const players=tSearchFilter?allPlayers.filter(p=>p.name.toLowerCase().includes(tSearchFilter.toLowerCase())):allPlayers;
   const cat=MANUAL_CATS.find(c=>c.id===tCat)||MANUAL_CATS[0];
-  return`${subHdr('Einzelpunkte vergeben')}
+  const isCustom=tCat==='other';
+  const checkedCount=allPlayers.filter(p=>tSingleSel[p.id]).length;
+  return`${subHdr('Punkte vergeben')}
   <div class="sub-content">
     <div class="form-group">
       <label class="form-label">Datum</label>
       <input type="date" class="form-input" value="${tDate}" data-change="att-date" id="single-date">
-    </div>
-    <div class="form-group">
-      <label class="form-label">Spieler</label>
-      <select class="form-select" data-change="single-player" id="single-player">
-        <option value="">Spieler wählen...</option>
-        ${players.map(p=>`<option value="${p.id}" ${tSelPlayer===p.id?'selected':''}>${esc(p.name)}</option>`).join('')}
-      </select>
     </div>
     <div class="form-group">
       <label class="form-label">Kategorie</label>
@@ -1014,20 +1062,42 @@ function singleHtml(){
         ${MANUAL_CATS.map(c=>`<option value="${c.id}" ${tCat===c.id?'selected':''}>${c.name} (${c.pts>0?'+':''}${c.pts})</option>`).join('')}
       </select>
     </div>
+    ${isCustom?`<div class="form-group">
+      <label class="form-label">Kategorie-Name</label>
+      <input type="text" class="form-input" value="${esc(tCustomCat)}" data-change="single-custom-cat"
+        id="single-custom-cat" placeholder="z.B. Sonderpunkt, Straftraining...">
+    </div>`:''}
     <div class="form-group">
       <label class="form-label">Punkte</label>
       <input type="number" class="form-input" value="${tPts}" data-change="single-pts" id="single-pts"
-        ${tCat!=='other'?'readonly':''} style="${tCat!=='other'?'opacity:.6':''}">
+        ${!isCustom?'readonly':''} style="${!isCustom?'opacity:.6':''}">
     </div>
     <div class="form-group">
       <label class="form-label">Kommentar (optional)</label>
       <input type="text" class="form-input" value="${esc(tComment)}" data-change="single-comment"
         id="single-comment" placeholder="z.B. Grund für Punkte">
     </div>
+    <label class="form-label">Spieler auswählen</label>
+    ${allPlayers.length>12?`<div class="form-group"><input type="text" class="form-input" value="${esc(tSearchFilter)}" data-change="search-filter" placeholder="Spieler suchen..." style="font-size:.85rem"></div>`:''}
+    <div class="flex-between mb-2">
+      <span style="font-size:.85rem;color:var(--text-2)">${checkedCount}/${allPlayers.length} ausgewählt</span>
+      <div class="btn-group">
+        <button class="btn btn-sm btn-secondary" data-action="single-all">Alle</button>
+        <button class="btn btn-sm btn-secondary" data-action="single-none">Keine</button>
+      </div>
+    </div>
+    <div class="plist">
+    ${players.map(p=>{
+      const on=!!tSingleSel[p.id];
+      return`<div class="pitem ${on?'checked':''}" data-action="toggle-single" data-id="${p.id}">
+        <div class="checkbox ${on?'on':''}">${on?I.check:''}</div>
+        <span class="pitem-name">${esc(p.name)}</span>
+      </div>`}).join('')}
+    </div>
   </div>
   <div class="sub-footer">
-    <button type="button" class="btn btn-primary btn-block" data-action="save-single" ${!tSelPlayer?'disabled':''}>
-      Punkte vergeben</button>
+    <button type="button" class="btn btn-primary btn-block" data-action="save-single" ${checkedCount===0?'disabled':''}>
+      Punkte vergeben (${checkedCount})</button>
   </div>`}
 
 /* ── Player Management ── */
@@ -1080,7 +1150,7 @@ function bonusHtml(){
   <div class="sub-content">
     <div class="info-card">
       <h3>${d.month} – ${d.total} Trainingseinheiten</h3>
-      <p style="font-size:.85rem;color:var(--text-2);margin:0">Spieler mit ≥80% Anwesenheit erhalten +3 Punkte</p>
+      <p style="font-size:.85rem;color:var(--text-2);margin:0">Spieler mit ≥80% Anwesenheit erhalten +${rulePts('Monatsbonus',3)} Punkte</p>
     </div>
     ${!d.total?`<div class="empty"><p>Noch keine Anwesenheitsdaten für diesen Monat.</p></div>`:`
     <div class="sec-heading">Spieler</div>
@@ -1095,7 +1165,7 @@ function bonusHtml(){
   </div>
   ${qualNotDone.length?`<div class="sub-footer">
     <button class="btn btn-success btn-block" data-action="save-bonus">
-      Bonus an ${qualNotDone.length} Spieler vergeben (+3)</button>
+      Bonus an ${qualNotDone.length} Spieler vergeben (+${rulePts('Monatsbonus',3)})</button>
   </div>`:''}`}
 
 /* ── Weekly Theme ── */
@@ -1317,8 +1387,8 @@ function undoHtml(){
 function openScreen(screen){
   UI.screen=screen;
   /* reset temp state */
-  tAtt={};tFit={};tDate=today();tTeams={};tWinner=null;tSelPlayer=null;
-  tCat='attendance';tPts=1;tComment='';tNewName='';tEditId=null;tEditName='';
+  tAtt={};tDate=today();tTeams={};tWinner=null;tSelPlayer=null;
+  tCat='fitness';tPts=1;tComment='';tCustomCat='';tSingleSel={};tNewName='';tEditId=null;tEditName='';
   tTheme='';tCustom='';tNewPin='';tConfPin='';tLogOpen={};
   tRuleEditId=null;tRuleTitle='';tRuleText='';tRulePts=null;tMsEditIdx=null;tMsValue='';tMsTitle='';tNewMsValue='';tNewMsTitle='';
   tSearchFilter='';tLogLimit=20;
@@ -1346,29 +1416,34 @@ app.addEventListener('click',e=>{
     case'screen-back':UI.screen=null;R();window.scrollTo(0,0);break;
 
     /* Attendance */
-    case'toggle-att':{const id=el.dataset.id;tAtt[id]=!tAtt[id];if(!tAtt[id])tFit[id]=false;R();break}
-    case'toggle-fit':{const id=el.dataset.id;tFit[id]=!tFit[id];R();break}
+    case'toggle-att':{const id=el.dataset.id;tAtt[id]=!tAtt[id];R();break}
     case'att-all':{const pl=activePlayers();const filtered=tSearchFilter?pl.filter(p=>p.name.toLowerCase().includes(tSearchFilter.toLowerCase())):pl;
       filtered.forEach(p=>tAtt[p.id]=true);R();break}
     case'att-none':{const pl=activePlayers();const filtered=tSearchFilter?pl.filter(p=>p.name.toLowerCase().includes(tSearchFilter.toLowerCase())):pl;
-      filtered.forEach(p=>{tAtt[p.id]=false;tFit[p.id]=false});R();break}
+      filtered.forEach(p=>{tAtt[p.id]=false});R();break}
     case'save-att':{
       const list=[];
       const dateStr=tDate||today();
       const dupes=[];
       const attPts=rulePts('Anwesenheit',1);
-      const fitPts=rulePts('Fitnesseinheit',1);
+      const sThr=streakThreshold();const sBon=streakBonus();
+      let streakCount=0;
       activePlayers().forEach(p=>{
         if(tAtt[p.id]){
           if(S.entries.some(e=>e.playerId===p.id&&e.category==='Anwesenheit'&&e.date===dateStr))dupes.push(p.name);
-          list.push({pid:p.id,pts:attPts,cat:'Anwesenheit'});
-          if(tFit[p.id])list.push({pid:p.id,pts:fitPts,cat:'Fitnesseinheit'})}
+          const streak=getStreak(p.id);
+          const useStreak=streak>=sThr;
+          if(useStreak)streakCount++;
+          const finalPts=useStreak?sBon:attPts;
+          list.push({pid:p.id,pts:finalPts,cat:'Anwesenheit',comment:useStreak?`Streak ${streak}`:''})}
       });
       if(!list.length){toast('Keine Spieler ausgewählt','err');break}
       if(dupes.length){toast(`Achtung: ${dupes.length} Spieler haben bereits Anwesenheit für ${fmtDate(dateStr)}`,'err');
         if(el.dataset.confirmed!=='1'){el.dataset.confirmed='1';
           el.textContent='Trotzdem speichern?';setTimeout(()=>{el.textContent=`Anwesenheit speichern (${list.filter(e=>e.cat==='Anwesenheit').length})`;delete el.dataset.confirmed},3000);break}}
-      addEntries(list);save();toast(`${list.length} Einträge gespeichert`);UI.screen=null;R();window.scrollTo(0,0);break}
+      addEntries(list);save();
+      const streakMsg=streakCount?` (${streakCount}× Streak-Bonus)`:'';
+      toast(`${list.length} Einträge gespeichert${streakMsg}`);UI.screen=null;R();window.scrollTo(0,0);break}
 
     /* Game Result */
     case'set-team':{const id=el.dataset.id;tTeams[id]=el.dataset.team||null;R();break}
@@ -1391,9 +1466,14 @@ app.addEventListener('click',e=>{
           lose.forEach(p=>list.push({pid:p.id,pts:losePts,cat:'Zweiter Platz Trainingsform'}))
         }
       }else{
-        const finalPts=rulePts('Sieg Abschlussspiel',2);
-        const win=tWinner==='a'?tA:tB;
-        win.forEach(p=>list.push({pid:p.id,pts:finalPts,cat:'Sieg Abschlussspiel'}))
+        if(tWinner==='draw'){
+          const drawPts=rulePts('Unentschieden Abschlussspiel',1);
+          [...tA,...tB].forEach(p=>list.push({pid:p.id,pts:drawPts,cat:'Unentschieden Abschlussspiel'}))
+        }else{
+          const finalPts=rulePts('Sieg Abschlussspiel',2);
+          const win=tWinner==='a'?tA:tB;
+          win.forEach(p=>list.push({pid:p.id,pts:finalPts,cat:'Sieg Abschlussspiel'}))
+        }
       }
       addEntries(list);save();toast(`${list.length} Punkte vergeben`);UI.screen=null;R();window.scrollTo(0,0);break}
 
@@ -1407,12 +1487,19 @@ app.addEventListener('click',e=>{
       toast(`${p?p.name:'Spieler'}: +${potPts} Punkte`);UI.screen=null;R();window.scrollTo(0,0);break}
 
     /* Single Points */
+    case'toggle-single':{const id=el.dataset.id;tSingleSel[id]=!tSingleSel[id];R();break}
+    case'single-all':{const pl=activePlayers();const filtered=tSearchFilter?pl.filter(p=>p.name.toLowerCase().includes(tSearchFilter.toLowerCase())):pl;
+      filtered.forEach(p=>tSingleSel[p.id]=true);R();break}
+    case'single-none':{const pl=activePlayers();const filtered=tSearchFilter?pl.filter(p=>p.name.toLowerCase().includes(tSearchFilter.toLowerCase())):pl;
+      filtered.forEach(p=>{tSingleSel[p.id]=false});R();break}
     case'save-single':{
-      if(!tSelPlayer){toast('Bitte Spieler wählen','err');break}
+      const selected=activePlayers().filter(p=>tSingleSel[p.id]);
+      if(!selected.length){toast('Bitte Spieler wählen','err');break}
       if(tPts===0){toast('0 Punkte können nicht vergeben werden','err');break}
       const cat=MANUAL_CATS.find(c=>c.id===tCat);
-      addEntries([{pid:tSelPlayer,pts:tPts,cat:cat?cat.name:'Sonstiges',comment:tComment}]);
-      save();toast('Punkte vergeben');UI.screen=null;R();window.scrollTo(0,0);break}
+      const catName=tCat==='other'&&tCustomCat.trim()?tCustomCat.trim():(cat?cat.name:'Sonstiges');
+      const list=selected.map(p=>({pid:p.id,pts:tPts,cat:catName,comment:tComment}));
+      addEntries(list);save();toast(`${list.length} Einträge gespeichert`);UI.screen=null;R();window.scrollTo(0,0);break}
 
     /* Player Management */
     case'add-player':{
@@ -1445,7 +1532,8 @@ app.addEventListener('click',e=>{
       const d=monthlyBonusData();
       const qual=d.players.filter(p=>p.qualifies&&!p.done);
       if(!qual.length){toast('Keine berechtigten Spieler','err');break}
-      const list=qual.map(p=>({pid:p.id,pts:3,cat:'Monatsbonus',comment:`${d.month} (≥ 80%)`}));
+      const bonusPts=rulePts('Monatsbonus',3);
+      const list=qual.map(p=>({pid:p.id,pts:bonusPts,cat:'Monatsbonus',comment:`${d.month} (≥ 80%)`}));
       addEntries(list);save();toast(`Bonus an ${qual.length} Spieler vergeben`);R();break}
 
     /* Weekly Theme */
@@ -1551,12 +1639,12 @@ app.addEventListener('change',e=>{
   if(!el)return;
   switch(el.dataset.change){
     case'att-date':tDate=el.value;break;
-    case'single-player':tSelPlayer=el.value||null;R();break;
     case'single-cat':{
       tCat=el.value;const cat=MANUAL_CATS.find(c=>c.id===tCat);
       tPts=cat?cat.pts:0;R();break}
     case'single-pts':tPts=parseInt(el.value)||0;break;
     case'single-comment':tComment=el.value;break;
+    case'single-custom-cat':tCustomCat=el.value;break;
     case'add-name':tNewName=el.value;break;
     case'edit-name':tEditName=el.value;break;
     case'theme-select':tTheme=el.value;R();break;
@@ -1589,6 +1677,7 @@ app.addEventListener('input',e=>{
     case'edit-name':tEditName=el.value;break;
     case'single-comment':tComment=el.value;break;
     case'single-pts':tPts=parseInt(el.value)||0;break;
+    case'single-custom-cat':tCustomCat=el.value;break;
     case'new-pin':tNewPin=el.value;break;
     case'conf-pin':tConfPin=el.value;break;
     case'theme-custom':tCustom=el.value;break;
@@ -1621,12 +1710,12 @@ async function exportCsv(){
   const players=sortedPlayers();
   const ms=monthStr();
   const totalDates=new Set(S.entries.filter(e=>e.category==='Anwesenheit'&&e.date.startsWith(ms)).map(e=>e.date)).size;
-  let csv=`﻿Rang;Name;Punkte;Anwesenheit;7-Tage-Änderung;Quote ${monthName()} (%)\n`;
+  let csv=`﻿Rang;Name;Punkte;Anwesenheit;Streak;7-Tage-Änderung;Quote ${monthName()} (%)\n`;
   const csvField=v=>/[;"\n]/.test(v)?`"${v.replace(/"/g,'""')}"`:v;
   players.forEach((p,i)=>{
     const mAtt=attCount(p.id,ms);
     const pct=totalDates?Math.round((mAtt/totalDates)*100):'–';
-    csv+=`${i+1};${csvField(p.name)};${p.points};${p.att};${p.delta>0?'+':''}${p.delta};${pct}\n`});
+    csv+=`${i+1};${csvField(p.name)};${p.points};${p.att};${p.streak};${p.delta>0?'+':''}${p.delta};${pct}\n`});
   await offerDownload('trainingsliga.csv',csv);
 }
 
