@@ -80,6 +80,12 @@ body{background:var(--bg);color:var(--text);font-family:var(--font-b);margin:0;p
 .sort-btn{padding:5px 12px;border-radius:20px;border:1px solid var(--border);background:var(--card);
   font-size:.75rem;font-weight:600;color:var(--text-2);cursor:pointer;transition:all .15s;font-family:var(--font-b)}
 .sort-btn.active{background:var(--primary);color:#fff;border-color:var(--primary)}
+.month-select{margin-left:auto;padding:5px 24px 5px 10px;border-radius:20px;border:1px solid var(--border);background:var(--card);
+  font-size:.75rem;font-weight:600;color:var(--text-2);font-family:var(--font-b);cursor:pointer;
+  appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23999'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 8px center;background-size:10px}
+.month-select.active{background-color:var(--primary);color:#fff;border-color:var(--primary);
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23fff'/%3E%3C/svg%3E")}
 
 /* ── League Table ── */
 .league-table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
@@ -94,7 +100,8 @@ body{background:var(--bg);color:var(--text);font-family:var(--font-b);margin:0;p
 .col-name{font-weight:600}
 .col-pts{width:48px;text-align:center;font-family:var(--font-d);font-weight:700;font-size:1rem}
 .col-chg{width:56px;text-align:right;font-size:.8rem;font-weight:600;white-space:nowrap}
-.col-arr{width:20px;text-align:center;color:var(--text-3);font-size:.75rem;padding-right:4px}
+.col-trend{width:40px;text-align:center;font-size:.75rem;font-weight:600;white-space:nowrap}
+.col-arr{color:var(--text-3);font-size:.75rem;margin-left:4px}
 .positive{color:var(--green)}.negative{color:var(--red)}.neutral{color:var(--text-3)}
 .rank-medal{display:inline-block;width:22px;height:22px;border-radius:50%;text-align:center;
   line-height:22px;font-size:.7rem;font-weight:700;color:#fff}
@@ -416,7 +423,7 @@ const I={
 
 /* ═══════════════════════════ STATE ═══════════════════════════ */
 let S={players:[],entries:[],weeklyTheme:'',weeklyThemeDate:'',pin:'1234',rules:DEFAULT_RULES.map(r=>({...r})),milestones:DEFAULT_MILESTONES.map(m=>({...m}))};
-let UI={view:'player',tab:'table',screen:null,sort:'points',auth:false,authAt:0,pinModal:false};
+let UI={view:'player',tab:'table',screen:null,sort:'points',monthFilter:null,auth:false,authAt:0,pinModal:false};
 const AUTH_TIMEOUT=30*60*1000; /* 30 minutes */
 function isAuth(){return UI.auth&&(Date.now()-UI.authAt<AUTH_TIMEOUT)}
 /* ── Firebase Config ── */
@@ -525,6 +532,19 @@ function ptsAsOf(pid,before){return Math.max(0,S.entries.filter(e=>e.playerId===
 
 function weekDelta(pid){const now=Date.now(),wa=now-7*864e5;return pts(pid)-ptsAsOf(pid,wa)}
 
+function rankDelta(pid){
+  const ap=activePlayers();
+  const pe=S.entries.filter(e=>e.playerId===pid);
+  if(!pe.length)return 0;
+  const last=pe.reduce((a,b)=>a.timestamp>b.timestamp?a:b);
+  const bPts=pe.filter(e=>e.batchId===last.batchId).reduce((s,e)=>s+e.points,0);
+  if(!bPts)return 0;
+  const rk=list=>list.findIndex(x=>x.id===pid)+1;
+  const cur=ap.map(p=>({id:p.id,p:pts(p.id),a:attCount(p.id)})).sort((a,b)=>b.p-a.p||b.a-a.a);
+  const prev=ap.map(p=>{const po=p.id===pid?Math.max(0,pts(p.id)-bPts):pts(p.id);return{id:p.id,p:po,a:attCount(p.id)}}).sort((a,b)=>b.p-a.p||b.a-a.a);
+  return rk(prev)-rk(cur);
+}
+
 function attCount(pid,ms){
   return S.entries.filter(e=>e.playerId===pid&&e.category==='Anwesenheit'&&(!ms||e.date.startsWith(ms))).length}
 
@@ -551,11 +571,22 @@ function rulePts(title,fallback){
 function avgPts(){const ap=activePlayers();if(!ap.length)return 0;
   return Math.round(ap.reduce((s,p)=>s+pts(p.id),0)/ap.length)}
 
+function ptsMonth(pid,ms){return Math.max(0,S.entries.filter(e=>e.playerId===pid&&e.date.startsWith(ms)).reduce((s,e)=>s+e.points,0))}
+
+function activeMonths(){
+  const ms=new Set(S.entries.map(e=>e.date.slice(0,7)));
+  return[...ms].sort().reverse();
+}
+
 function sortedPlayers(){
-  const ap=activePlayers().map(p=>({...p,points:pts(p.id),delta:weekDelta(p.id),att:attCount(p.id),streak:getStreak(p.id)}));
-  if(UI.sort==='name')ap.sort((a,b)=>a.name.localeCompare(b.name,'de'));
-  else if(UI.sort==='change')ap.sort((a,b)=>b.delta-a.delta||b.points-a.points||b.att-a.att);
-  else ap.sort((a,b)=>b.points-a.points||b.att-a.att);
+  const mf=UI.monthFilter;
+  let ap=activePlayers().map(p=>({...p,
+    points:mf?ptsMonth(p.id,mf):pts(p.id),
+    delta:weekDelta(p.id),att:attCount(p.id),streak:getStreak(p.id)}));
+  if(UI.sort==='change'){
+    ap=ap.filter(p=>p.delta!==0);
+    ap.sort((a,b)=>b.delta-a.delta||b.points-a.points||b.att-a.att);
+  }else ap.sort((a,b)=>b.points-a.points||b.att-a.att);
   return ap;
 }
 
@@ -711,16 +742,34 @@ function playerViewHtml(){
 
 function tableHtml(){
   const players=sortedPlayers();
-  if(!players.length)return`<div class="empty slide-up"><div class="empty-title">Noch keine Spieler</div><p>Füge Spieler im Trainer-Bereich hinzu.</p></div>`;
+  const noPlayers=!activePlayers().length;
+  if(!players.length){
+    if(noPlayers)return`<div class="empty slide-up"><div class="empty-title">Noch keine Spieler</div><p>Füge Spieler im Trainer-Bereich hinzu.</p></div>`;
+    const msel=(()=>{const ms=activeMonths();if(!ms.length)return'';
+      return`<select class="month-select${UI.monthFilter?' active':''}" data-change="month-filter">
+        <option value=""${UI.monthFilter===null?' selected':''}>Alle Monate</option>
+        ${ms.map(m=>`<option value="${m}"${UI.monthFilter===m?' selected':''}>${MONTHS[parseInt(m.slice(5),10)-1]} ${m.slice(2,4)}</option>`).join('')}
+      </select>`})();
+    return`<div class="sort-bar" style="align-items:center">
+      <button class="sort-btn ${UI.sort==='points'?'active':''}" data-action="sort" data-sort="points">Gesamt</button>
+      <button class="sort-btn ${UI.sort==='change'?'active':''}" data-action="sort" data-sort="change">7 Tage</button>
+      ${msel}
+    </div>
+    <div class="empty slide-up"><div class="empty-title">Keine Änderungen</div><p>In den letzten 7 Tagen wurden keine Punkte vergeben.</p></div>`;
+  }
   return`
-  <div class="sort-bar">
-    <button class="sort-btn ${UI.sort==='points'?'active':''}" data-action="sort" data-sort="points">Punkte</button>
-    <button class="sort-btn ${UI.sort==='name'?'active':''}" data-action="sort" data-sort="name">Name</button>
+  <div class="sort-bar" style="align-items:center">
+    <button class="sort-btn ${UI.sort==='points'?'active':''}" data-action="sort" data-sort="points">Gesamt</button>
     <button class="sort-btn ${UI.sort==='change'?'active':''}" data-action="sort" data-sort="change">7 Tage</button>
+    ${(()=>{const ms=activeMonths();if(!ms.length)return'';
+      return`<select class="month-select${UI.monthFilter?' active':''}" data-change="month-filter">
+        <option value=""${UI.monthFilter===null?' selected':''}>Alle Monate</option>
+        ${ms.map(m=>`<option value="${m}"${UI.monthFilter===m?' selected':''}>${MONTHS[parseInt(m.slice(5),10)-1]} ${m.slice(2,4)}</option>`).join('')}
+      </select>`})()}
   </div>
   <div class="scroll-x">
   <table class="league-table">
-    <thead><tr><th class="col-rank">#</th><th>Spieler</th><th class="col-pts">Pkt</th><th class="col-chg">+/-</th><th class="col-arr"></th></tr></thead>
+    <thead><tr><th class="col-rank">#</th><th>Spieler</th>${UI.sort==='change'?'':`<th class="col-pts">Pkt</th>`}${UI.monthFilter?'':`<th class="col-chg">${UI.sort==='points'?'7 Tage':'+/-'}</th>`}${UI.sort==='points'?'<th class="col-trend">▲/▼</th>':''}</tr></thead>
     <tbody>${players.map((p,i)=>{
       const changeClass=p.delta>0?'positive':p.delta<0?'negative':'neutral';
       const arrow=p.delta>0?'▲':p.delta<0?'▼':'▬';
@@ -729,10 +778,10 @@ function tableHtml(){
       const streakHtml=p.streak>=sThr?`<span class="streak-badge">\u{1F525}${p.streak}</span>`:'';
       return`<tr class="slide-up" style="animation-delay:${i*30}ms" data-action="player-detail" data-id="${p.id}">
         <td class="col-rank">${medal}</td>
-        <td class="col-name">${esc(p.name)}${streakHtml}</td>
-        <td class="col-pts">${p.points}</td>
-        <td class="col-chg ${changeClass}"><span>${arrow}</span> ${p.delta>0?'+':''}${p.delta}</td>
-        <td class="col-arr">›</td>
+        <td class="col-name">${esc(p.name)}${streakHtml} <span class="col-arr">›</span></td>
+        ${UI.sort==='change'?'':`<td class="col-pts">${p.points}</td>`}
+        ${UI.monthFilter?'':`<td class="col-chg ${changeClass}"><span>${arrow}</span> ${p.delta>0?'+':''}${p.delta}</td>`}
+        ${UI.sort==='points'?(()=>{const rd=rankDelta(p.id);const tc=rd>0?'positive':rd<0?'negative':'neutral';const ta=rd>0?'▲':rd<0?'▼':'▬';return`<td class="col-trend ${tc}">${ta}${rd!==0?' '+Math.abs(rd):''}</td>`})():''}
       </tr>`}).join('')}</tbody>
   </table></div>`}
 
@@ -791,7 +840,8 @@ function playerDetailHtml(){
   const entries=S.entries.filter(e=>e.playerId===p.id).sort((a,b)=>b.timestamp-a.timestamp);
   const visible=entries.slice(0,tDetailLimit);
   const hasMore=entries.length>tDetailLimit;
-  const rank=sortedPlayers().findIndex(sp=>sp.id===p.id)+1;
+  const allRanked=activePlayers().map(pl=>({id:pl.id,p:pts(pl.id),a:attCount(pl.id)})).sort((a,b)=>b.p-a.p||b.a-a.a);
+  const rank=allRanked.findIndex(sp=>sp.id===p.id)+1;
   return`
   <div class="sub-hdr"><button class="sub-back" data-action="close-detail">${I.back}</button>
     <span class="sub-title">${esc(p.name)}</span></div>
@@ -1365,22 +1415,37 @@ function dataHtml(){
 
 /* ── Undo ── */
 function undoHtml(){
-  if(!S.entries.length)return`${subHdr('Rückgängig')}
-    <div class="sub-content"><div class="empty"><p>Keine Einträge vorhanden.</p></div></div>`;
-  const last=S.entries[S.entries.length-1];
-  const bid=last.batchId;
-  const batch=S.entries.filter(e=>e.batchId===bid);
-  const players=batch.map(e=>{const p=S.players.find(pl=>pl.id===e.playerId);return p?p.name:'?'});
-  const uniqueNames=[...new Set(players)];
-  return`${subHdr('Rückgängig')}
-  <div class="sub-content">
+  const hasEntries=S.entries.length>0;
+  let undoSection='';
+  if(hasEntries){
+    const last=S.entries[S.entries.length-1];
+    const bid=last.batchId;
+    const batch=S.entries.filter(e=>e.batchId===bid);
+    const players=batch.map(e=>{const p=S.players.find(pl=>pl.id===e.playerId);return p?p.name:'?'});
+    const uniqueNames=[...new Set(players)];
+    undoSection=`
+    <div class="sec-heading">Letzte Aktion</div>
     <div class="confirm-box">
       <p><strong>Letzte Aktion rückgängig machen?</strong></p>
       <p style="font-size:.85rem">${batch.length} Eintrag/Einträge vom ${fmtDate(last.date)}</p>
       <p style="font-size:.85rem">Spieler: ${uniqueNames.map(n=>esc(n)).join(', ')}</p>
       <p style="font-size:.85rem">Kategorien: ${[...new Set(batch.map(e=>e.category))].join(', ')}</p>
     </div>
-    <button class="btn btn-danger btn-block" data-action="confirm-undo">Rückgängig machen</button>
+    <button class="btn btn-danger btn-block" data-action="confirm-undo">Rückgängig machen</button>`;
+  }else{
+    undoSection=`<div class="empty" style="padding:20px"><p>Keine Einträge zum Rückgängig machen.</p></div>`;
+  }
+  const totalEntries=S.entries.length;
+  const totalPlayers=activePlayers().length;
+  return`${subHdr('Rückgängig')}
+  <div class="sub-content">
+    ${undoSection}
+    <div class="sec-heading" style="margin-top:24px">Neustart</div>
+    <div class="info-card" style="border-left:3px solid var(--red)">
+      <h3 style="color:var(--red)">Alle Punkte zurücksetzen</h3>
+      <p style="font-size:.85rem;color:var(--text-2);margin:0 0 10px">Löscht alle ${totalEntries} Einträge (Punkte, Anwesenheit, Boni). Die ${totalPlayers} Spieler bleiben erhalten. Diese Aktion kann nicht rückgängig gemacht werden.</p>
+      <button class="btn btn-danger btn-block" data-action="reset-all-points" ${!totalEntries?'disabled':''}>Alle Punkte auf Null setzen</button>
+    </div>
   </div>`}
 
 /* ═══════════════════════════ EVENT HANDLING ═══════════════════════════ */
@@ -1402,11 +1467,11 @@ app.addEventListener('click',e=>{
 
   try{ switch(a){
     /* Navigation */
-    case'tab':UI.tab=el.dataset.tab;tFeedLimit=15;tDetailPlayer=null;R();window.scrollTo(0,0);break;
+    case'tab':UI.tab=el.dataset.tab;tFeedLimit=15;tDetailPlayer=null;UI.monthFilter=null;UI.sort='points';R();window.scrollTo(0,0);break;
     case'player-detail':tDetailPlayer=el.dataset.id;tDetailLimit=20;R();window.scrollTo(0,0);break;
     case'close-detail':tDetailPlayer=null;R();window.scrollTo(0,0);break;
     case'detail-more':tDetailLimit+=20;R();break;
-    case'sort':UI.sort=el.dataset.sort;R();break;
+    case'sort':UI.sort=el.dataset.sort;UI.monthFilter=null;R();break;
     case'open-pin':{
       if(isAuth()){UI.view='trainer';R();window.scrollTo(0,0);break}
       UI.pinModal=true;R();break}
@@ -1630,6 +1695,15 @@ app.addEventListener('click',e=>{
     case'confirm-undo':{
       const count=undoLast();if(count===false){toast('Nichts zum Rückgängig machen','err');break}
       save();toast(`${count} Einträge rückgängig gemacht`);UI.screen=null;R();window.scrollTo(0,0);break}
+    case'reset-all-points':{
+      if(!S.entries.length){toast('Keine Einträge vorhanden','err');break}
+      if(el.dataset.confirmed!=='1'){
+        el.textContent=`Wirklich ALLE ${S.entries.length} Einträge löschen?`;
+        el.dataset.confirmed='1';
+        setTimeout(()=>{el.textContent='Alle Punkte auf Null setzen';delete el.dataset.confirmed},4000);break}
+      const count=S.entries.length;
+      S.entries=[];save();
+      toast(`${count} Einträge gelöscht – Neustart!`);UI.screen=null;R();window.scrollTo(0,0);break}
   }
   }catch(err){console.error('Action error:',a,err);toast('Fehler: '+err.message,'err')}
 });
@@ -1659,6 +1733,7 @@ app.addEventListener('change',e=>{
     case'new-ms-value':tNewMsValue=el.value;updateBtnState();break;
     case'new-ms-title':tNewMsTitle=el.value;break;
     case'search-filter':tSearchFilter=el.value;updateFilteredList();break;
+    case'month-filter':{const m=el.value;UI.monthFilter=m||null;UI.sort=m?null:'points';R();break}
     case'import-json':{
       const file=el.files?.[0];if(!file)break;
       const reader=new FileReader();
@@ -1707,7 +1782,9 @@ function handlePinSubmit(){
 
 /* ═══════════════════════════ EXPORT ═══════════════════════════ */
 async function exportCsv(){
-  const players=sortedPlayers();
+  const players=activePlayers().map(p=>({...p,
+    points:pts(p.id),delta:weekDelta(p.id),att:attCount(p.id),streak:getStreak(p.id)}))
+    .sort((a,b)=>b.points-a.points||b.att-a.att);
   const ms=monthStr();
   const totalDates=new Set(S.entries.filter(e=>e.category==='Anwesenheit'&&e.date.startsWith(ms)).map(e=>e.date)).size;
   let csv=`﻿Rang;Name;Punkte;Anwesenheit;Streak;7-Tage-Änderung;Quote ${monthName()} (%)\n`;
