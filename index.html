@@ -364,6 +364,7 @@ const CATS=[
   {id:'fitness',name:'Fitnesseinheit',pts:1},
   {id:'win_training',name:'Sieg Trainingsform',pts:2},
   {id:'second_training',name:'Zweiter Platz Trainingsform',pts:1},
+  {id:'draw_training',name:'Unentschieden Trainingsform',pts:1},
   {id:'win_final',name:'Sieg Abschlussspiel',pts:2},
   {id:'draw_final',name:'Unentschieden Abschlussspiel',pts:1},
   {id:'pot',name:'Spieler des Trainings',pts:2},
@@ -377,7 +378,7 @@ const CATS=[
   {id:'starting',name:'Startbonus',pts:0},
   {id:'other',name:'Sonstiges',pts:0}
 ];
-const MANUAL_CATS=CATS.filter(c=>!['attendance','win_training','second_training','win_final','draw_final','pot','monthly_bonus','starting'].includes(c.id));
+const MANUAL_CATS=CATS.filter(c=>!['attendance','win_training','second_training','draw_training','win_final','draw_final','pot','monthly_bonus','starting'].includes(c.id));
 const THEMES=['Kopfballkönig','Assist-König','Tackling-Monster','Mentalitäts-Monster',
   'Passsicherheit','Dauerbrenner','Elfmeterkönig','Teamplayer'];
 const DEFAULT_MILESTONES=[{value:25,title:'Bronze'},{value:50,title:'Silber'},{value:75,title:'Gold'},{value:100,title:'Legende'}];
@@ -385,7 +386,8 @@ const DEFAULT_RULES=[
   {id:'r1',title:'Anwesenheit',text:'+1 Punkt für Teilnahme am Training',pts:1},
   {id:'r2',title:'Fitnesseinheit',text:'+1 Punkt für Fitness vor/nach dem Training',pts:1},
   {id:'r3',title:'Sieg Trainingsform',text:'+2 Punkte für das Gewinnerteam',pts:2},
-  {id:'r4',title:'Zweiter Platz Trainingsform',text:'+1 Punkt für das Verliererteam (bei Unentschieden alle +1)',pts:1},
+  {id:'r4',title:'Zweiter Platz Trainingsform',text:'+1 Punkt für das Verliererteam',pts:1},
+  {id:'r4b',title:'Unentschieden Trainingsform',text:'+1 Punkt für alle bei Unentschieden',pts:1},
   {id:'r5',title:'Sieg Abschlussspiel',text:'+2 Punkte für das Gewinnerteam',pts:2},
   {id:'r5b',title:'Unentschieden Abschlussspiel',text:'+1 Punkt für beide Teams bei Unentschieden',pts:1},
   {id:'r5c',title:'Zu null im Abschlussspiel',text:'+2 Punkte für den Torhüter bei einem Zu-null-Spiel',pts:2},
@@ -1075,7 +1077,7 @@ function gameHtml(type){
       </div>
     </div>
     <div class="info-card" style="font-size:.8rem;color:var(--text-2)">
-      ${type==='game'?`Sieger: +${rulePts('Sieg Trainingsform',2)} (Sieg Trainingsform) · Verlierer: +${rulePts('Zweiter Platz Trainingsform',1)} (Zweiter Platz) · Unentschieden: alle +${rulePts('Zweiter Platz Trainingsform',1)}`
+      ${type==='game'?`Sieger: +${rulePts('Sieg Trainingsform',2)} (Sieg Trainingsform) · Verlierer: +${rulePts('Zweiter Platz Trainingsform',1)} (Zweiter Platz) · Unentschieden: alle +${rulePts('Unentschieden Trainingsform',1)}`
         :`Sieger: +${rulePts('Sieg Abschlussspiel',2)} (Sieg Abschlussspiel) · Unentschieden: alle +${rulePts('Unentschieden Abschlussspiel',1)}`}
     </div>
   </div>
@@ -1548,7 +1550,8 @@ app.addEventListener('click',e=>{
         const winPts=rulePts('Sieg Trainingsform',2);
         const losePts=rulePts('Zweiter Platz Trainingsform',1);
         if(tWinner==='draw'){
-          [...tA,...tB].forEach(p=>list.push({pid:p.id,pts:losePts,cat:'Zweiter Platz Trainingsform',comment:'Unentschieden'}))
+          const drawPts=rulePts('Unentschieden Trainingsform',1);
+          [...tA,...tB].forEach(p=>list.push({pid:p.id,pts:drawPts,cat:'Unentschieden Trainingsform'}))
         }else{
           const win=tWinner==='a'?tA:tB;const lose=tWinner==='a'?tB:tA;
           win.forEach(p=>list.push({pid:p.id,pts:winPts,cat:'Sieg Trainingsform'}));
