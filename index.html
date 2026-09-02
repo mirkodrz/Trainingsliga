@@ -368,6 +368,7 @@ const CATS=[
   {id:'draw_final',name:'Unentschieden Abschlussspiel',pts:1},
   {id:'pot',name:'Spieler des Trainings',pts:2},
   {id:'effort',name:'Besondere Einsatzbereitschaft',pts:1},
+  {id:'clean_sheet',name:'Zu null im Abschlussspiel',pts:2},
   {id:'unsportsmanlike',name:'Unsportliches Verhalten',pts:-3},
   {id:'weekly_theme',name:'Wochenthema erfüllt',pts:2},
   {id:'challenge',name:'Challenge-Sieger',pts:2},
@@ -387,6 +388,7 @@ const DEFAULT_RULES=[
   {id:'r4',title:'Zweiter Platz Trainingsform',text:'+1 Punkt für das Verliererteam (bei Unentschieden alle +1)',pts:1},
   {id:'r5',title:'Sieg Abschlussspiel',text:'+2 Punkte für das Gewinnerteam',pts:2},
   {id:'r5b',title:'Unentschieden Abschlussspiel',text:'+1 Punkt für beide Teams bei Unentschieden',pts:1},
+  {id:'r5c',title:'Zu null im Abschlussspiel',text:'+2 Punkte für den Torhüter bei einem Zu-null-Spiel',pts:2},
   {id:'r6',title:'Spieler des Trainings',text:'+2 Punkte – vom Trainer gewählt',pts:2},
   {id:'r7',title:'Wochenthema erfüllt',text:'+2 Punkte für besondere Leistung im Wochenthema'},
   {id:'r8',title:'Challenge-Sieger',text:'+2 Punkte für den Gewinner einer Challenge'},
@@ -443,6 +445,7 @@ let tAtt={},tDate='',tTeams={},tWinner=null,tSelPlayer=null;
 let tCat='fitness',tPts=1,tComment='',tCustomCat='',tSingleSel={},tNewName='',tEditId=null,tEditName='';
 let tTheme='',tCustom='',tNewPin='',tConfPin='',tLogOpen={};
 let tRuleEditId=null,tRuleTitle='',tRuleText='',tRulePts=null,tMsEditIdx=null,tMsValue='',tMsTitle='',tNewMsValue='',tNewMsTitle='';
+let tEditEntryId=null,tEditEntryPts='';
 
 function defaultState(){return{players:[],entries:[],weeklyTheme:'',weeklyThemeDate:'',pin:'1234',
   rules:DEFAULT_RULES.map(r=>({...r})),milestones:DEFAULT_MILESTONES.map(m=>({...m}))}}
@@ -860,12 +863,24 @@ function playerDetailHtml(){
     ${!entries.length?`<div class="empty" style="padding:20px"><p>Noch keine Einträge</p></div>`:`
     ${visible.map(e=>{
       const pos=e.points>0;const neg=e.points<0;
-      return`<div class="pd-entry slide-up">
+      const editing=isAuth()&&tEditEntryId===e.id;
+      return editing?`<div class="pd-entry slide-up" style="flex-wrap:wrap;gap:6px">
+        <div class="pd-entry-info" style="flex:1">
+          <span class="pd-entry-cat">${esc(e.category)}${e.comment?' – '+esc(e.comment):''}</span>
+          <span class="pd-entry-meta">${fmtDate(e.date)}</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:4px">
+          <input type="number" class="form-input" value="${tEditEntryPts}" data-change="edit-entry-pts" style="width:70px;padding:4px 6px;font-size:.9rem;text-align:center;font-family:var(--font-d);font-weight:700">
+          <button class="btn btn-primary btn-sm" data-action="save-entry-edit" data-id="${e.id}" style="padding:4px 8px">OK</button>
+          <button class="btn btn-secondary btn-sm" data-action="cancel-entry-edit" style="padding:4px 8px">✕</button>
+        </div>
+      </div>`:`<div class="pd-entry slide-up">
         <div class="pd-entry-info">
           <span class="pd-entry-cat">${esc(e.category)}${e.comment?' – '+esc(e.comment):''}</span>
           <span class="pd-entry-meta">${fmtDate(e.date)}</span>
         </div>
         <span class="pd-entry-pts ${pos?'positive':neg?'negative':''}">${pos?'+':''}${e.points}</span>
+        ${isAuth()?`<button class="pm-btn" data-action="edit-entry" data-id="${e.id}" data-pts="${e.points}" style="padding:4px 8px;font-size:.7rem;margin-left:6px">Bearb.</button>`:''}
       </div>`}).join('')}
     ${hasMore?`<button class="btn btn-secondary btn-block mt-2" data-action="detail-more">Mehr anzeigen (${entries.length-tDetailLimit} weitere)</button>`:''}`}
   </div>`}
@@ -1469,8 +1484,17 @@ app.addEventListener('click',e=>{
     /* Navigation */
     case'tab':UI.tab=el.dataset.tab;tFeedLimit=15;tDetailPlayer=null;UI.monthFilter=null;UI.sort='points';R();window.scrollTo(0,0);break;
     case'player-detail':tDetailPlayer=el.dataset.id;tDetailLimit=20;R();window.scrollTo(0,0);break;
-    case'close-detail':tDetailPlayer=null;R();window.scrollTo(0,0);break;
+    case'close-detail':tDetailPlayer=null;tEditEntryId=null;R();window.scrollTo(0,0);break;
     case'detail-more':tDetailLimit+=20;R();break;
+    case'edit-entry':tEditEntryId=el.dataset.id;tEditEntryPts=el.dataset.pts;R();break;
+    case'cancel-entry-edit':tEditEntryId=null;R();break;
+    case'save-entry-edit':{
+      const eid=el.dataset.id;const newPts=parseInt(tEditEntryPts);
+      if(isNaN(newPts)){toast('Ungültiger Wert','err');break}
+      const entry=S.entries.find(e=>e.id===eid);
+      if(entry){entry.points=newPts;tEditEntryId=null;save();toast('Punkte aktualisiert');R()}
+      break;
+    }
     case'sort':UI.sort=el.dataset.sort;UI.monthFilter=null;R();break;
     case'open-pin':{
       if(isAuth()){UI.view='trainer';R();window.scrollTo(0,0);break}
@@ -1733,6 +1757,7 @@ app.addEventListener('change',e=>{
     case'new-ms-value':tNewMsValue=el.value;updateBtnState();break;
     case'new-ms-title':tNewMsTitle=el.value;break;
     case'search-filter':tSearchFilter=el.value;updateFilteredList();break;
+    case'edit-entry-pts':tEditEntryPts=el.value;break;
     case'month-filter':{const m=el.value;UI.monthFilter=m||null;UI.sort=m?null:'points';R();break}
     case'import-json':{
       const file=el.files?.[0];if(!file)break;
