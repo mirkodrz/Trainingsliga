@@ -109,6 +109,45 @@ body{background:var(--bg);color:var(--text);font-family:var(--font-b);margin:0;p
 .streak-badge{display:inline-flex;align-items:center;gap:1px;padding:1px 5px;border-radius:8px;
   font-size:.65rem;font-weight:700;font-family:var(--font-d);background:var(--gold-s);color:var(--gold);
   white-space:nowrap;vertical-align:middle;margin-left:4px;letter-spacing:.01em}
+.injury-badge{display:inline-flex;align-items:center;gap:2px;padding:1px 5px;border-radius:8px;
+  font-size:.65rem;font-weight:700;font-family:var(--font-d);background:var(--red-s);color:var(--red);
+  white-space:nowrap;vertical-align:middle;margin-left:4px;letter-spacing:.01em}
+.injury-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:14px;margin-bottom:10px}
+.injury-card h4{margin:0 0 6px;font-size:.9rem}
+.injury-card .injury-dates{font-size:.8rem;color:var(--text-2)}
+.injury-confirm{background:var(--gold-s);border:1px solid var(--gold);border-radius:var(--radius);padding:14px;margin:10px 0}
+.injury-confirm h3{margin:0 0 8px;font-size:.95rem;color:var(--gold)}
+
+/* ── Season ── */
+.season-banner{display:flex;justify-content:space-between;align-items:center;padding:8px 14px;
+  background:var(--primary-s);border-left:3px solid var(--primary);font-size:.82rem}
+.season-banner.warn{background:var(--red-s);border-left-color:var(--red)}
+.season-banner-name{font-weight:600;font-family:var(--font-d)}
+.season-banner-info{color:var(--text-2);font-size:.78rem}
+.season-banner.warn .season-banner-info{color:var(--red);font-weight:600}
+.season-award-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)}
+.season-award-badge{font-size:1.3rem;width:32px;text-align:center;flex-shrink:0}
+.season-award-info{font-size:.85rem}
+.season-past-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:12px;margin-bottom:8px}
+.past-badges{font-size:.6rem;margin-left:3px;vertical-align:middle;letter-spacing:1px}
+.share-img-btn{margin-left:auto;background:none;border:1px solid var(--border);border-radius:var(--radius-s);
+  padding:4px 8px;color:var(--text-2);cursor:pointer;display:flex;align-items:center;transition:color .15s}
+.share-img-btn:hover{color:var(--primary)}.share-img-btn svg{width:18px;height:18px}
+
+/* ── Wochen-Highlights ── */
+.hl-row{display:flex;flex-direction:column;gap:6px;padding:10px 14px 4px}
+.hl-card{display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid var(--border);
+  border-radius:var(--radius);padding:8px 12px;cursor:pointer;transition:box-shadow .15s}
+.hl-card:active{box-shadow:var(--shadow-m)}
+.hl-icon{font-size:1.2rem;flex-shrink:0;width:28px;text-align:center}
+.hl-body{display:flex;flex-direction:column;min-width:0}
+.hl-label{font-size:.65rem;font-family:var(--font-d);font-weight:600;text-transform:uppercase;
+  letter-spacing:.05em;color:var(--text-3)}
+.hl-val{font-size:.85rem;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hl-num{font-family:var(--font-d);font-size:.8rem}
+.hl-num.positive{color:var(--green)}
+.hl-streak{cursor:default}
+.hl-streak:active{box-shadow:none}
 
 /* ── Activity Feed ── */
 .feed{padding:8px 14px}
@@ -121,6 +160,9 @@ body{background:var(--bg);color:var(--text);font-family:var(--font-b);margin:0;p
 .feed-cat{color:var(--text-2);font-size:.8rem}
 .feed-time{color:var(--text-3);font-size:.75rem;margin-top:2px}
 .feed-row{display:flex;justify-content:space-between;align-items:baseline}
+.feed-milestone{border-left-color:var(--gold);background:var(--gold-s);padding:8px 12px}
+.feed-milestone .feed-name{color:var(--gold)}
+.feed-milestone .feed-cat{color:var(--text);font-size:.85rem}
 
 /* ── Milestones ── */
 .milestones{padding:14px}
@@ -134,6 +176,18 @@ body{background:var(--bg);color:var(--text);font-family:var(--font-b);margin:0;p
 .ms-names{font-size:.85rem;color:var(--text-2)}
 .ms-bar{height:4px;background:var(--border);border-radius:2px;margin-top:6px;overflow:hidden}
 .ms-fill{height:100%;background:var(--gold);border-radius:2px;transition:width .4s ease}
+
+/* ── Milestone Progress (Player Detail) ── */
+.ms-progress{padding:0 0 8px}
+.ms-progress-bar{position:relative;height:6px;background:var(--border);border-radius:3px;margin:20px 0 28px}
+.ms-progress-fill{height:100%;background:linear-gradient(90deg,var(--gold),var(--gold-s) 50%,var(--gold));border-radius:3px;transition:width .5s ease}
+.ms-marker{position:absolute;top:50%;transform:translate(-50%,-50%);z-index:1}
+.ms-marker-dot{width:12px;height:12px;border-radius:50%;background:var(--border);border:2px solid var(--bg-alt);transition:background .3s}
+.ms-marker.done .ms-marker-dot{background:var(--gold);box-shadow:0 0 6px rgba(184,136,10,.4)}
+.ms-marker-label{position:absolute;top:16px;left:50%;transform:translateX(-50%);font-size:.62rem;font-family:var(--font-d);
+  font-weight:600;white-space:nowrap;color:var(--text-3);text-transform:uppercase;letter-spacing:.03em}
+.ms-marker.done .ms-marker-label{color:var(--gold)}
+.ms-next-info{font-size:.82rem;color:var(--text-2);margin-top:2px}
 
 /* ── Footer / Login ── */
 .footer-bar{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:520px;
@@ -272,6 +326,10 @@ body{background:var(--bg);color:var(--text);font-family:var(--font-b);margin:0;p
 .toast-ok{background:var(--green);color:#fff}
 .toast-err{background:var(--red);color:#fff}
 .toast-info{background:var(--card);color:var(--text);border:1px solid var(--border)}
+.toast-undo{display:flex;align-items:center;gap:10px;justify-content:center}
+.undo-btn{background:rgba(255,255,255,.25);color:#fff;border:1px solid rgba(255,255,255,.4);
+  border-radius:4px;padding:2px 10px;font-size:.8rem;font-weight:700;cursor:pointer;white-space:nowrap}
+.undo-btn:active{background:rgba(255,255,255,.4)}
 
 /* ── Confirmation ── */
 .confirm-box{background:var(--red-s);border:1px solid var(--red);border-radius:var(--radius);
@@ -376,9 +434,10 @@ const CATS=[
   {id:'unexcused',name:'Unentschuldigtes Fehlen',pts:-2},
   {id:'monthly_bonus',name:'Monatsbonus',pts:3},
   {id:'starting',name:'Startbonus',pts:0},
+  {id:'injury_comp',name:'Verletzungsausgleich',pts:0},
   {id:'other',name:'Sonstiges',pts:0}
 ];
-const MANUAL_CATS=CATS.filter(c=>!['attendance','win_training','second_training','draw_training','win_final','draw_final','pot','monthly_bonus','starting'].includes(c.id));
+const MANUAL_CATS=CATS.filter(c=>!['attendance','win_training','second_training','draw_training','win_final','draw_final','pot','monthly_bonus','starting','injury_comp'].includes(c.id));
 const THEMES=['Kopfballkönig','Assist-König','Tackling-Monster','Mentalitäts-Monster',
   'Passsicherheit','Dauerbrenner','Elfmeterkönig','Teamplayer'];
 const DEFAULT_MILESTONES=[{value:25,title:'Bronze'},{value:50,title:'Silber'},{value:75,title:'Gold'},{value:100,title:'Legende'}];
@@ -395,12 +454,14 @@ const DEFAULT_RULES=[
   {id:'r7',title:'Wochenthema erfüllt',text:'+2 Punkte für besondere Leistung im Wochenthema'},
   {id:'r8',title:'Challenge-Sieger',text:'+2 Punkte für den Gewinner einer Challenge'},
   {id:'r9',title:'Besondere Einsatzbereitschaft',text:'+1 Punkt für überdurchschnittlichen Einsatz'},
-  {id:'r10',title:'Monatsbonus',text:'+3 Punkte bei ≥75% Anwesenheit im Monat (automatisch zum Monatswechsel)',pts:3},
+  {id:'r10',title:'Monatsbonus',text:'Punkte bei Erreichen der Bonus-Schwelle im Monat (automatisch zum Monatswechsel)',pts:3},
+  {id:'r_bonus_thr',title:'Bonus-Schwelle',text:'Anwesenheitsquote (%) für den Monatsbonus',pts:75},
   {id:'r11',title:'Unsportliches Verhalten',text:'-3 Punkte bei Unsportlichkeit oder Respektlosigkeit'},
   {id:'r12',title:'Unentschuldigtes Fehlen',text:'-2 Punkte bei Fehlen ohne Absage'},
   {id:'r13',title:'Startbonus',text:'Neue Spieler starten mit dem aktuellen Kaderdurchschnitt'},
   {id:'r_streak_thr',title:'Streak-Schwelle',text:'Anzahl aufeinanderfolgender Trainings für Streak-Aktivierung',pts:5},
   {id:'r_streak_bon',title:'Streak-Bonus',text:'Anwesenheitspunkte pro Training bei aktiver Streak (statt normal)',pts:3},
+  {id:'r_injury',title:'Verletzungsausgleich',text:'Verletzte Spieler erhalten nach Genesung den Median der aktiven Spieler im Verletzungszeitraum.'},
   {id:'r14',title:'Allgemeine Regeln',text:'Punkte können nie unter 0 fallen. Bei Punktegleichstand entscheidet die Anwesenheit.'}
 ];
 const MONTHS=['Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'];
@@ -423,11 +484,12 @@ const I={
   trophy:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9H4.5a2.5 2.5 0 010-5H6M18 9h1.5a2.5 2.5 0 000-5H18M4 22h16M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20 7 22M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20 17 22M18 2H6v7a6 6 0 0012 0V2z"/></svg>',
   book:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/><line x1="8" y1="7" x2="16" y2="7"/><line x1="8" y1="11" x2="14" y2="11"/></svg>',
   flag:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/></svg>',
-  trash:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3,6 5,6 21,6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>'
+  trash:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3,6 5,6 21,6"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>',
+  injury:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>'
 };
 
 /* ═══════════════════════════ STATE ═══════════════════════════ */
-let S={players:[],entries:[],weeklyTheme:'',weeklyThemeDate:'',pin:'1234',rules:DEFAULT_RULES.map(r=>({...r})),milestones:DEFAULT_MILESTONES.map(m=>({...m}))};
+let S={players:[],entries:[],injuries:[],weeklyTheme:'',weeklyThemeDate:'',pin:'1234',rules:DEFAULT_RULES.map(r=>({...r})),milestones:DEFAULT_MILESTONES.map(m=>({...m})),season:null,pastSeasons:[]};
 let UI={view:'player',tab:'table',screen:null,sort:'points',monthFilter:null,auth:false,authAt:0,pinModal:false};
 const AUTH_TIMEOUT=30*60*1000; /* 30 minutes */
 function isAuth(){return UI.auth&&(Date.now()-UI.authAt<AUTH_TIMEOUT)}
@@ -441,7 +503,7 @@ const FIREBASE_CONFIG = {
   appId: "1:1024456343662:web:7073715de48df48ad2e67f"
 };
 const FB_DOC = 'trainingsliga/data';
-let fbReady=false,fbDb=null,fbSaving=false;
+let fbReady=false,fbDb=null,fbSaving=0;
 
 /* temp screen state */
 let tAtt={},tDate='',tTeams={},tWinner=null,tSelPlayer=null;
@@ -450,9 +512,12 @@ let tTheme='',tCustom='',tNewPin='',tConfPin='',tLogOpen={};
 let tRuleEditId=null,tRuleTitle='',tRuleText='',tRulePts=null,tMsEditIdx=null,tMsValue='',tMsTitle='',tNewMsValue='',tNewMsTitle='';
 let tEditEntryId=null,tEditEntryPts='';
 let tDeletePlayerId=null;
+let tInjuryPlayerId=null,tInjuryStart='',tInjuryEnd='',tInjuryConfirm=null;
+let tBonusMonth='';
+let tSeasonStart='',tSeasonEnd='',tSeasonName='',tSeasonConfirm=null;
 
-function defaultState(){return{players:[],entries:[],weeklyTheme:'',weeklyThemeDate:'',pin:'1234',
-  rules:DEFAULT_RULES.map(r=>({...r})),milestones:DEFAULT_MILESTONES.map(m=>({...m}))}}
+function defaultState(){return{players:[],entries:[],injuries:[],weeklyTheme:'',weeklyThemeDate:'',pin:'1234',
+  rules:DEFAULT_RULES.map(r=>({...r})),milestones:DEFAULT_MILESTONES.map(m=>({...m})),season:null,pastSeasons:[]}}
 function migrate(d){
   /* ensure existing rules get pts from defaults where applicable */
   let rules=d.rules&&d.rules.length?d.rules:DEFAULT_RULES.map(r=>({...r}));
@@ -468,9 +533,9 @@ function migrate(d){
   /* update Monatsbonus rule text if still old 80% version */
   const mbRule=rules.find(r=>r.title==='Monatsbonus');
   if(mbRule&&mbRule.text&&mbRule.text.includes('80%')){mbRule.text=mbRule.text.replace('80%','75%')}
-  return{players:d.players||[],entries:d.entries||[],
+  return{players:d.players||[],entries:d.entries||[],injuries:d.injuries||[],
   weeklyTheme:d.weeklyTheme||'',weeklyThemeDate:d.weeklyThemeDate||'',pin:d.pin||'1234',
-  rules,milestones:migrateMilestones(d.milestones)}}
+  rules,milestones:migrateMilestones(d.milestones),season:d.season||null,pastSeasons:d.pastSeasons||[]}}
 function migrateMilestones(arr){
   if(!arr||!arr.length)return DEFAULT_MILESTONES.map(m=>({...m}));
   return arr.map(m=>{
@@ -492,7 +557,7 @@ async function initFirebase(){
     fbReady=true;
     /* Echtzeit-Listener: aktualisiert bei jedem Gerät automatisch */
     fbDb.doc(FB_DOC).onSnapshot(snap=>{
-      if(fbSaving){fbSaving=false;return}
+      if(fbSaving>0){fbSaving--;return}
       if(snap.exists){S=migrate(snap.data());R()}
     });
     return true;
@@ -512,8 +577,8 @@ async function load(){
 async function save(){
   try{localStorage.setItem('tl_v2',JSON.stringify(S))}catch(e){}
   if(fbReady){
-    try{fbSaving=true;await fbDb.doc(FB_DOC).set(JSON.parse(JSON.stringify(S)))}
-    catch(e){fbSaving=false;console.error('Save error:',e);toast('Speichern fehlgeschlagen','err')}
+    try{fbSaving++;await fbDb.doc(FB_DOC).set(JSON.parse(JSON.stringify(S)))}
+    catch(e){fbSaving=Math.max(0,fbSaving-1);console.error('Save error:',e);toast('Speichern fehlgeschlagen','err')}
   }
 }
 
@@ -546,19 +611,19 @@ function weekDelta(pid){const now=Date.now(),wa=now-7*864e5;return pts(pid)-ptsA
 
 function rankDelta(pid){
   const ap=activePlayers();
-  const pe=S.entries.filter(e=>e.playerId===pid);
-  if(!pe.length)return 0;
-  const last=pe.reduce((a,b)=>a.timestamp>b.timestamp?a:b);
-  const bPts=pe.filter(e=>e.batchId===last.batchId).reduce((s,e)=>s+e.points,0);
-  if(!bPts)return 0;
-  const rk=list=>list.findIndex(x=>x.id===pid)+1;
+  const wa=Date.now()-7*864e5;
+  const rk=(list,id)=>{const idx=list.findIndex(x=>x.id===id);return idx<0?0:idx+1};
   const cur=ap.map(p=>({id:p.id,p:pts(p.id),a:attCount(p.id)})).sort((a,b)=>b.p-a.p||b.a-a.a);
-  const prev=ap.map(p=>{const po=p.id===pid?Math.max(0,pts(p.id)-bPts):pts(p.id);return{id:p.id,p:po,a:attCount(p.id)}}).sort((a,b)=>b.p-a.p||b.a-a.a);
-  return rk(prev)-rk(cur);
+  const prev=ap.map(p=>({id:p.id,p:ptsAsOf(p.id,wa),a:attCountAsOf(p.id,wa)})).sort((a,b)=>b.p-a.p||b.a-a.a);
+  const curRk=rk(cur,pid),prevRk=rk(prev,pid);
+  if(!curRk||!prevRk)return 0;
+  return prevRk-curRk;
 }
 
 function attCount(pid,ms){
   return S.entries.filter(e=>e.playerId===pid&&e.category==='Anwesenheit'&&(!ms||e.date.startsWith(ms))).length}
+function attCountAsOf(pid,before){
+  return S.entries.filter(e=>e.playerId===pid&&e.category==='Anwesenheit'&&e.timestamp<=before).length}
 
 function getStreak(pid){
   /* Alle Trainingstage = Daten mit mindestens einem Anwesenheits-Eintrag */
@@ -573,6 +638,7 @@ function getStreak(pid){
 
 function streakThreshold(){return rulePts('Streak-Schwelle',5)}
 function streakBonus(){return rulePts('Streak-Bonus',3)}
+function bonusThreshold(){return rulePts('Bonus-Schwelle',75)/100}
 function isStreakActive(pid){return getStreak(pid)>=streakThreshold()}
 
 function rulePts(title,fallback){
@@ -582,6 +648,114 @@ function rulePts(title,fallback){
 
 function avgPts(){const ap=activePlayers();if(!ap.length)return 0;
   return Math.round(ap.reduce((s,p)=>s+pts(p.id),0)/ap.length)}
+
+/* ── Wochen-Highlights ── */
+function weekHighlights(){
+  const ap=activePlayers();
+  if(ap.length<3)return{aufsteiger:null,sammler:null,streaks:[]};
+  /* Aufsteiger: biggest positive rank gain in 7 days */
+  let bestRd=0,aufsteiger=null;
+  ap.forEach(p=>{const rd=rankDelta(p.id);if(rd>bestRd){bestRd=rd;aufsteiger={name:p.name,delta:rd,id:p.id}}});
+  /* Punktesammler: most points in 7 days */
+  let bestWd=0,sammler=null;
+  ap.forEach(p=>{const wd=weekDelta(p.id);if(wd>bestWd){bestWd=wd;sammler={name:p.name,pts:wd,id:p.id}}});
+  /* Don't show sammler if same player as aufsteiger */
+  if(aufsteiger&&sammler&&aufsteiger.id===sammler.id)sammler=null;
+  /* Active streaks */
+  const sThr=streakThreshold();
+  const streaks=ap.map(p=>({name:p.name,streak:getStreak(p.id),id:p.id})).filter(s=>s.streak>=sThr).sort((a,b)=>b.streak-a.streak).slice(0,3);
+  return{aufsteiger,sammler,streaks};
+}
+
+/* ── Season helpers ── */
+function seasonActive(){return S.season&&S.season.startDate&&S.season.endDate}
+function seasonDaysLeft(){
+  if(!seasonActive())return null;
+  const end=new Date(S.season.endDate+'T23:59:59');
+  const diff=end-new Date();
+  return diff>0?Math.ceil(diff/864e5):0;
+}
+function seasonEntriesInRange(pid,start,end){
+  return S.entries.filter(e=>e.playerId===pid&&e.date>=start&&e.date<=end);
+}
+function calcSeasonAwards(startDate,endDate){
+  const ap=activePlayers();if(ap.length<2)return[];
+  const awards=[];
+  /* 🥇🥈🥉 Top 3 by points in season range */
+  const ranked=ap.map(p=>{
+    const seasonPts=seasonEntriesInRange(p.id,startDate,endDate).reduce((s,e)=>s+e.points,0);
+    return{id:p.id,name:p.name,pts:seasonPts,att:attCount(p.id)}
+  }).sort((a,b)=>b.pts-a.pts||b.att-a.att);
+  const medals=['🥇','🥈','🥉'];
+  ranked.slice(0,3).forEach((p,i)=>{if(p.pts>0)awards.push({playerId:p.id,name:p.name,badge:medals[i],label:['Erster Platz','Zweiter Platz','Dritter Platz'][i],value:p.pts+' Pkt'})});
+  /* 🔥 Longest streak — check all players' max consecutive attendance in season */
+  let bestStreak=0,streakPlayer=null;
+  ap.forEach(p=>{
+    const attDates=S.entries.filter(e=>e.playerId===p.id&&e.category==='Anwesenheit'&&e.date>=startDate&&e.date<=endDate).map(e=>e.date).sort();
+    let maxS=0,cur=0,prevDate='';
+    const allTraining=[...new Set(S.entries.filter(e=>e.category==='Anwesenheit'&&e.date>=startDate&&e.date<=endDate).map(e=>e.date))].sort();
+    for(const d of allTraining){
+      if(attDates.includes(d)){cur++;if(cur>maxS)maxS=cur}else{cur=0}
+    }
+    if(maxS>bestStreak){bestStreak=maxS;streakPlayer={id:p.id,name:p.name}}
+  });
+  if(streakPlayer&&bestStreak>=3)awards.push({playerId:streakPlayer.id,name:streakPlayer.name,badge:'🔥',label:'Längste Streak',value:bestStreak+'× hintereinander'});
+  /* 💪 Highest attendance */
+  let bestAtt=0,attPlayer=null;
+  const totalTrainingDays=[...new Set(S.entries.filter(e=>e.category==='Anwesenheit'&&e.date>=startDate&&e.date<=endDate).map(e=>e.date))].length;
+  ap.forEach(p=>{
+    const a=S.entries.filter(e=>e.playerId===p.id&&e.category==='Anwesenheit'&&e.date>=startDate&&e.date<=endDate).length;
+    if(a>bestAtt){bestAtt=a;attPlayer={id:p.id,name:p.name}}
+  });
+  if(attPlayer&&totalTrainingDays>0)awards.push({playerId:attPlayer.id,name:attPlayer.name,badge:'💪',label:'Höchste Anwesenheit',value:bestAtt+'/'+totalTrainingDays});
+  /* ⭐ Most "Spieler des Trainings" */
+  let bestPot=0,potPlayer=null;
+  ap.forEach(p=>{
+    const c=S.entries.filter(e=>e.playerId===p.id&&e.category==='Spieler des Trainings'&&e.date>=startDate&&e.date<=endDate).length;
+    if(c>bestPot){bestPot=c;potPlayer={id:p.id,name:p.name}}
+  });
+  if(potPlayer&&bestPot>0)awards.push({playerId:potPlayer.id,name:potPlayer.name,badge:'⭐',label:'Spieler des Trainings',value:bestPot+'×'});
+  /* 🎯 Most challenges/themes */
+  let bestCT=0,ctPlayer=null;
+  ap.forEach(p=>{
+    const c=S.entries.filter(e=>e.playerId===p.id&&(e.category==='Challenge-Sieger'||e.category==='Wochenthema erfüllt')&&e.date>=startDate&&e.date<=endDate).length;
+    if(c>bestCT){bestCT=c;ctPlayer={id:p.id,name:p.name}}
+  });
+  if(ctPlayer&&bestCT>0)awards.push({playerId:ctPlayer.id,name:ctPlayer.name,badge:'🎯',label:'Challenge-König',value:bestCT+'×'});
+  return awards;
+}
+function playerBadges(pid){
+  const badges=[];
+  (S.pastSeasons||[]).forEach(s=>{
+    (s.awards||[]).filter(a=>a.playerId===pid).forEach(a=>{badges.push(a.badge)});
+  });
+  return badges;
+}
+
+/* ── Injury helpers ── */
+function getActiveInjury(pid){return(S.injuries||[]).find(inj=>inj.playerId===pid&&!inj.endDate)}
+function getInjuries(pid){return(S.injuries||[]).filter(inj=>inj.playerId===pid)}
+function isInjured(pid){return!!getActiveInjury(pid)}
+
+function injuryMedianPts(startDate,endDate){
+  /* Median der Punkte aller nicht-verletzten aktiven Spieler im Zeitraum */
+  const ap=activePlayers();
+  const notInjured=ap.filter(p=>{
+    const inj=getActiveInjury(p.id);
+    if(!inj)return true;
+    /* Spieler, die selbst im gleichen Zeitraum verletzt waren, ausschließen */
+    return false;
+  });
+  if(!notInjured.length)return 0;
+  const ptsInRange=notInjured.map(p=>{
+    return S.entries.filter(e=>e.playerId===p.id&&e.date>=startDate&&e.date<=endDate)
+      .reduce((s,e)=>s+e.points,0);
+  }).sort((a,b)=>a-b);
+  const mid=Math.floor(ptsInRange.length/2);
+  const median=ptsInRange.length%2!==0?ptsInRange[mid]:Math.round((ptsInRange[mid-1]+ptsInRange[mid])/2);
+  return Math.max(0,median);
+}
+
 
 function ptsMonth(pid,ms){return Math.max(0,S.entries.filter(e=>e.playerId===pid&&e.date.startsWith(ms)).reduce((s,e)=>s+e.points,0))}
 
@@ -635,7 +809,7 @@ function monthlyBonusData(ms){
   const pdata=activePlayers().map(p=>{
     const att=attCount(p.id,monthKey);const rate=att/total;
     const done=S.entries.some(e=>e.playerId===p.id&&e.category==='Monatsbonus'&&e.date.startsWith(monthKey));
-    return{...p,att,total,rate,qualifies:rate>=0.75,done}});
+    return{...p,att,total,rate,qualifies:rate>=bonusThreshold(),done}});
   return{total,month:mName,monthKey,players:pdata}}
 
 /* ── Auto Monthly Bonus ── */
@@ -655,7 +829,7 @@ function checkAutoMonthlyBonus(){
   const dateStr=lastDayPrev.toISOString().slice(0,10);
   qualNotDone.forEach(p=>{
     S.entries.push({id:uid(),playerId:p.id,points:bonusPts,category:'Monatsbonus',
-      comment:`${d.month} (≥75% – automatisch)`,date:dateStr,timestamp:ts++,batchId:batch});
+      comment:`${d.month} (≥${Math.round(bonusThreshold()*100)}% – automatisch)`,date:dateStr,timestamp:ts++,batchId:batch});
   });
   save();
   setTimeout(()=>toast(`Monatsbonus ${d.month}: ${qualNotDone.length} Spieler automatisch erhalten`,'info'),1000);
@@ -675,6 +849,7 @@ function addPlayer(name){
 function deletePlayer(pid){
   S.players=S.players.filter(p=>p.id!==pid);
   S.entries=S.entries.filter(e=>e.playerId!==pid);
+  if(S.injuries)S.injuries=S.injuries.filter(i=>i.playerId!==pid);
 }
 
 function addEntries(list){
@@ -770,6 +945,7 @@ function playerViewHtml(){
     </div>
   </div>
   ${S.weeklyTheme&&!tDetailPlayer?`<div class="theme-banner"><span class="theme-label">Wochenthema</span><span class="theme-value">${esc(S.weeklyTheme)}</span></div>`:''}
+  ${seasonActive()&&!tDetailPlayer?(()=>{const dl=seasonDaysLeft();const warn=dl!==null&&dl<=28&&dl>0;const ended=dl===0;return`<div class="season-banner${warn||ended?' warn':''}"><span class="season-banner-name">${esc(S.season.name||'Saison')}</span><span class="season-banner-info">${ended?'Endet heute!':dl!==null?dl+' Tag'+(dl!==1?'e':'')+' verbleibend':''}</span></div>`})():''}
   ${tDetailPlayer?'':`<div class="tab-bar">
     <button class="tab-btn ${UI.tab==='table'?'active':''}" data-action="tab" data-tab="table">Tabelle</button>
     <button class="tab-btn ${UI.tab==='feed'?'active':''}" data-action="tab" data-tab="feed">Aktivitäten</button>
@@ -781,6 +957,17 @@ function playerViewHtml(){
   <div class="footer-bar">
     <button class="trainer-btn" data-action="open-pin">${I.lock} Trainer-Bereich</button>
   </div>`}
+
+function highlightsHtml(){
+  if(UI.sort!=='points')return'';
+  const h=weekHighlights();
+  if(!h.aufsteiger&&!h.sammler&&!h.streaks.length)return'';
+  let cards='';
+  if(h.aufsteiger)cards+=`<div class="hl-card hl-aufsteiger" data-action="player-detail" data-id="${h.aufsteiger.id}"><span class="hl-icon">🚀</span><span class="hl-body"><span class="hl-label">Aufsteiger</span><span class="hl-val">${esc(h.aufsteiger.name)} <span class="hl-num positive">+${h.aufsteiger.delta}</span></span></span></div>`;
+  if(h.sammler)cards+=`<div class="hl-card hl-sammler" data-action="player-detail" data-id="${h.sammler.id}"><span class="hl-icon">🧲</span><span class="hl-body"><span class="hl-label">Punktesammler</span><span class="hl-val">${esc(h.sammler.name)} <span class="hl-num positive">+${h.sammler.pts}</span></span></span></div>`;
+  if(h.streaks.length)cards+=`<div class="hl-card hl-streak"><span class="hl-icon">\u{1F525}</span><span class="hl-body"><span class="hl-label">Streak${h.streaks.length>1?'s':''}</span><span class="hl-val">${h.streaks.map(s=>`${esc(s.name)} (${s.streak})`).join(', ')}</span></span></div>`;
+  return`<div class="hl-row slide-up">${cards}</div>`;
+}
 
 function tableHtml(){
   const players=sortedPlayers();
@@ -800,6 +987,7 @@ function tableHtml(){
     <div class="empty slide-up"><div class="empty-title">Keine Änderungen</div><p>In den letzten 7 Tagen wurden keine Punkte vergeben.</p></div>`;
   }
   return`
+  ${highlightsHtml()}
   <div class="sort-bar" style="align-items:center">
     <button class="sort-btn ${UI.sort==='points'?'active':''}" data-action="sort" data-sort="points">Gesamt</button>
     <button class="sort-btn ${UI.sort==='change'?'active':''}" data-action="sort" data-sort="change">7 Tage</button>
@@ -808,6 +996,7 @@ function tableHtml(){
         <option value=""${UI.monthFilter===null?' selected':''}>Alle Monate</option>
         ${ms.map(m=>`<option value="${m}"${UI.monthFilter===m?' selected':''}>${MONTHS[parseInt(m.slice(5),10)-1]} ${m.slice(2,4)}</option>`).join('')}
       </select>`})()}
+    ${UI.sort==='points'?`<button class="share-img-btn" data-action="share-table" title="Top 10 als Bild teilen">${I.download}</button>`:''}
   </div>
   <div class="scroll-x">
   <table class="league-table">
@@ -818,14 +1007,28 @@ function tableHtml(){
       const medal=i<3?`<span class="rank-medal medal-${i+1}">${i+1}</span>`:`${i+1}`;
       const sThr=streakThreshold();
       const streakHtml=p.streak>=sThr?`<span class="streak-badge">\u{1F525}${p.streak}</span>`:'';
+      const injHtml=isInjured(p.id)?`<span class="injury-badge">✚</span>`:'';
       return`<tr class="slide-up" style="animation-delay:${i*30}ms" data-action="player-detail" data-id="${p.id}">
         <td class="col-rank">${medal}</td>
-        <td class="col-name">${esc(p.name)}${streakHtml} <span class="col-arr">›</span></td>
+        <td class="col-name">${esc(p.name)}${injHtml}${streakHtml}${(()=>{const b=playerBadges(p.id);return b.length?`<span class="past-badges">${b.join('')}</span>`:''})()} <span class="col-arr">›</span></td>
         ${UI.sort==='change'?'':`<td class="col-pts">${p.points}</td>`}
         ${UI.monthFilter?'':`<td class="col-chg ${changeClass}"><span>${arrow}</span> ${p.delta>0?'+':''}${p.delta}</td>`}
         ${UI.sort==='points'?(()=>{const rd=rankDelta(p.id);const tc=rd>0?'positive':rd<0?'negative':'neutral';const ta=rd>0?'▲':rd<0?'▼':'▬';return`<td class="col-trend ${tc}">${ta}${rd!==0?' '+Math.abs(rd):''}</td>`})():''}
       </tr>`}).join('')}</tbody>
   </table></div>`}
+
+/* Check if an entry pushed a player past a milestone */
+function milestoneCrossed(entry){
+  if(entry.points<=0)return null;
+  const milestones=msSorted();if(!milestones.length)return null;
+  /* Points after this entry */
+  const after=S.entries.filter(e=>e.playerId===entry.playerId&&e.timestamp<=entry.timestamp).reduce((s,e)=>s+e.points,0);
+  const before=after-entry.points;
+  /* Find highest milestone crossed */
+  let crossed=null;
+  milestones.forEach(m=>{const v=msVal(m);if(before<v&&after>=v)crossed=m});
+  return crossed;
+}
 
 function feedHtml(){
   const total=S.entries.length;
@@ -836,7 +1039,13 @@ function feedHtml(){
   return`<div class="feed">${items.map(e=>{
     const dateLabel=relDate(e.date);const showDate=dateLabel!==lastDate;lastDate=dateLabel;
     const pos=e.points>0;const neg=e.points<0;
+    const crossed=milestoneCrossed(e);
+    const msTitle=crossed?(typeof crossed==='object'&&crossed.title?crossed.title:msVal(crossed)+' Punkte'):'';
     return`${showDate?`<div class="sec-heading">${dateLabel}</div>`:''}
+    ${crossed?`<div class="feed-item feed-milestone slide-up">
+      <div class="feed-row"><span class="feed-name">🎉 ${esc(e.playerName)}</span></div>
+      <div class="feed-cat">Erfolg erreicht: <b>${esc(msTitle)}</b></div>
+    </div>`:''}
     <div class="feed-item ${pos?'pos':neg?'neg':''} slide-up">
       <div class="feed-row"><span class="feed-name">${esc(e.playerName)}</span>
         <span class="feed-pts ${pos?'pos':neg?'neg':''}">${pos?'+':''}${e.points}</span></div>
@@ -886,7 +1095,7 @@ function playerDetailHtml(){
   const rank=allRanked.findIndex(sp=>sp.id===p.id)+1;
   return`
   <div class="sub-hdr"><button class="sub-back" data-action="close-detail">${I.back}</button>
-    <span class="sub-title">${esc(p.name)}</span></div>
+    <span class="sub-title">${esc(p.name)}${(()=>{const b=playerBadges(p.id);return b.length?' '+b.join(''):''})()}</span></div>
   <div class="sub-content">
     <div class="pd-stats">
       <div class="pd-stat"><div class="pd-stat-val">${rank>0?'#'+rank:'–'}</div><div class="pd-stat-lbl">Platz</div></div>
@@ -894,10 +1103,48 @@ function playerDetailHtml(){
       <div class="pd-stat"><div class="pd-stat-val ${delta>0?'positive':delta<0?'negative':''}">${delta>0?'+':''}${delta}</div><div class="pd-stat-lbl">7 Tage</div></div>
     </div>
     <div class="pd-stats" style="grid-template-columns:1fr 1fr 1fr">
-      <div class="pd-stat"><div class="pd-stat-val">${totalAtt}</div><div class="pd-stat-lbl">Anwesenheit</div></div>
-      <div class="pd-stat"><div class="pd-stat-val" style="color:${attPct>=75?'var(--green)':attPct>0?'var(--red)':'var(--text)'}">${totalTrainings?attPct+'%':'–'}</div><div class="pd-stat-lbl">${monthName()} (${myAtt}/${totalTrainings})</div></div>
+      <div class="pd-stat"><div class="pd-stat-val">${totalAtt}</div><div class="pd-stat-lbl">Trainings</div></div>
+      <div class="pd-stat"><div class="pd-stat-val" style="color:${totalTrainings?(attPct>=bonusThreshold()*100?'var(--green)':'var(--red)'):'var(--text)'}">${totalTrainings?`${myAtt}/${totalTrainings}`:'–'}</div><div class="pd-stat-lbl">${monthName()} ${totalTrainings?Math.round(attPct)+'%':''}</div></div>
       <div class="pd-stat"><div class="pd-stat-val" style="color:${sActive?'var(--gold)':'var(--text)'}">${streak>0?'\u{1F525}'+streak:'–'}</div><div class="pd-stat-lbl">Streak${sActive?' aktiv':''}</div></div>
     </div>
+    ${(()=>{
+      const actInj=getActiveInjury(p.id);
+      const pastInj=getInjuries(p.id).filter(inj=>inj.endDate);
+      if(!actInj&&!pastInj.length)return'';
+      let html='<div class="sec-heading">Verletzungen</div>';
+      if(actInj){html+=`<div class="injury-card" style="border-left:3px solid var(--red)">
+        <h4 style="color:var(--red)">✚ Aktuell verletzt</h4>
+        <div class="injury-dates">Seit ${fmtDate(actInj.startDate)}</div>
+      </div>`}
+      pastInj.slice().reverse().forEach(inj=>{
+        const credited=S.entries.find(e=>e.playerId===p.id&&e.category==='Verletzungsausgleich'&&e.comment&&e.comment.includes(inj.id));
+        html+=`<div class="injury-card">
+          <h4>${fmtDate(inj.startDate)} – ${fmtDate(inj.endDate)}</h4>
+          ${credited?`<div class="injury-dates" style="color:var(--green)">+${credited.points} Punkte gutgeschrieben</div>`
+            :`<div class="injury-dates">Keine Punkte gutgeschrieben</div>`}
+        </div>`});
+      return html;
+    })()}
+    ${(()=>{
+      const milestones=msSorted();if(!milestones.length)return'';
+      const maxMs=msVal(milestones[milestones.length-1]);
+      const barMax=Math.max(maxMs,points)*1.05||100;
+      const reached=milestones.filter(m=>points>=msVal(m));
+      const next=milestones.find(m=>points<msVal(m));
+      return`<div class="sec-heading">Erfolge</div>
+      <div class="ms-progress">
+        <div class="ms-progress-bar">
+          <div class="ms-progress-fill" style="width:${Math.min(100,Math.round(points/barMax*100))}%"></div>
+          ${milestones.map(m=>{const v=msVal(m);const title=typeof m==='object'&&m.title?m.title:v+' Pkt';const left=Math.min(100,Math.round(v/barMax*100));const done=points>=v;
+            return`<div class="ms-marker${done?' done':''}" style="left:${left}%" title="${title} (${v} Pkt)">
+              <div class="ms-marker-dot"></div>
+              <div class="ms-marker-label">${esc(title)}</div>
+            </div>`}).join('')}
+        </div>
+        ${next?`<div class="ms-next-info">Nächstes Ziel: <b>${typeof next==='object'&&next.title?esc(next.title):msVal(next)+' Punkte'}</b> – noch ${msVal(next)-points} Punkt${msVal(next)-points!==1?'e':''}</div>`
+          :`<div class="ms-next-info" style="color:var(--gold)">🏆 Alle Erfolge erreicht!</div>`}
+      </div>`;
+    })()}
     <div class="sec-heading">Punktehistorie (${entries.length})</div>
     ${!entries.length?`<div class="empty" style="padding:20px"><p>Noch keine Einträge</p></div>`:`
     ${visible.map(e=>{
@@ -933,7 +1180,7 @@ function ruleClass(r){
 function rulesHtml(){
   const rules=S.rules&&S.rules.length?S.rules:DEFAULT_RULES;
   /* Filter streak config rules from player view — replace with readable explanation */
-  const visible=rules.filter(r=>r.id!=='r_streak_thr'&&r.id!=='r_streak_bon');
+  const visible=rules.filter(r=>r.id!=='r_streak_thr'&&r.id!=='r_streak_bon'&&r.id!=='r_bonus_thr');
   if(!visible.length)return`<div class="empty slide-up"><div class="empty-title">Keine Regeln hinterlegt</div></div>`;
   const sThr=streakThreshold();const sBon=streakBonus();
   const streakCard=`<div class="rule-card rule-info slide-up">
@@ -987,6 +1234,8 @@ function trainerMenuHtml(){
     ]},
     {title:'Verwaltung',cards:[
       {id:'players',icon:I.users,label:'Spieler verwalten'},
+      {id:'injuries',icon:I.injury,label:'Verletzungen'},
+      {id:'season',icon:I.trophy,label:'Saison'},
       {id:'theme',icon:I.tag,label:'Wochenthema'},
       {id:'edit-rules',icon:I.book,label:'Regeln bearbeiten'},
       {id:'edit-milestones',icon:I.flag,label:'Erfolge'}
@@ -1014,6 +1263,8 @@ function subScreenHtml(){
     case'pot':return potHtml();
     case'single':return singleHtml();
     case'players':return playerMgmtHtml();
+    case'injuries':return injuryHtml();
+    case'season':return seasonHtml();
     case'bonus':return bonusHtml();
     case'theme':return themeHtml();
     case'edit-rules':return editRulesHtml();
@@ -1257,10 +1508,86 @@ function playerMgmtHtml(){
     </div>`).join('')}`:''}
   </div>`}
 
+/* ── Injuries ── */
+function injuryHtml(){
+  const ap=activePlayers().sort((a,b)=>a.name.localeCompare(b.name,'de'));
+  const injured=ap.filter(p=>isInjured(p.id));
+  const healthy=ap.filter(p=>!isInjured(p.id));
+  return`${subHdr('Verletzungen')}
+  <div class="sub-content">
+    ${tInjuryConfirm?(()=>{
+      const inj=tInjuryConfirm;
+      const p=S.players.find(pl=>pl.id===inj.playerId);
+      const medPts=injuryMedianPts(inj.startDate,inj.endDate);
+      const days=Math.round((new Date(inj.endDate)-new Date(inj.startDate))/864e5);
+      return`<div class="injury-confirm">
+        <h3>Verletzungsausgleich für ${p?esc(p.name):'Spieler'}</h3>
+        <p style="font-size:.85rem;margin:0 0 6px">Verletzt vom ${fmtDate(inj.startDate)} bis ${fmtDate(inj.endDate)} (${days} Tage)</p>
+        <p style="font-size:.85rem;margin:0 0 10px">Median der aktiven Spieler in diesem Zeitraum: <strong>${medPts} Punkte</strong></p>
+        <p style="font-size:.85rem;margin:0 0 12px">${medPts} Punkte als Verletzungsausgleich gutschreiben?</p>
+        <div class="btn-group">
+          <button class="btn btn-success btn-sm" data-action="confirm-injury-credit" data-id="${inj.id}" data-pts="${medPts}">Ja, +${medPts} Punkte</button>
+          <button class="btn btn-secondary btn-sm" data-action="skip-injury-credit" data-id="${inj.id}">Nein, keine Punkte</button>
+          <button class="btn btn-secondary btn-sm" data-action="cancel-injury-end" data-id="${inj.id}">Abbrechen</button>
+        </div>
+      </div>`})():''}
+    ${tInjuryPlayerId?(()=>{
+      const p=S.players.find(pl=>pl.id===tInjuryPlayerId);
+      const actInj=getActiveInjury(tInjuryPlayerId);
+      if(actInj){
+        return`<div class="info-card" style="border-left:3px solid var(--green)">
+          <h3>Verletzung beenden – ${p?esc(p.name):''}</h3>
+          <p style="font-size:.85rem;color:var(--text-2);margin:0 0 8px">Verletzt seit ${fmtDate(actInj.startDate)}</p>
+          <div class="form-group"><label class="form-label">Ende der Verletzung</label>
+            <input type="date" class="form-input" value="${tInjuryEnd||today()}" data-change="injury-end-date" style="max-width:200px"></div>
+          <div class="btn-group">
+            <button class="btn btn-success btn-sm" data-action="end-injury" data-id="${actInj.id}">Verletzung beenden</button>
+            <button class="btn btn-secondary btn-sm" data-action="cancel-injury-form">Abbrechen</button>
+          </div>
+        </div>`}
+      return`<div class="info-card" style="border-left:3px solid var(--red)">
+        <h3>Verletzung eintragen – ${p?esc(p.name):''}</h3>
+        <div class="form-group"><label class="form-label">Beginn der Verletzung</label>
+          <input type="date" class="form-input" value="${tInjuryStart||today()}" data-change="injury-start-date" style="max-width:200px"></div>
+        <div class="btn-group">
+          <button class="btn btn-danger btn-sm" data-action="save-injury">Als verletzt markieren</button>
+          <button class="btn btn-secondary btn-sm" data-action="cancel-injury-form">Abbrechen</button>
+        </div>
+      </div>`})():''}
+    ${injured.length?`
+    <div class="sec-heading">Aktuell verletzt (${injured.length})</div>
+    ${injured.map(p=>{
+      const inj=getActiveInjury(p.id);
+      const days=Math.round((Date.now()-new Date(inj.startDate).getTime())/864e5);
+      return`<div class="pm-item">
+        <span class="pm-name" style="color:var(--red)">✚ ${esc(p.name)}</span>
+        <span style="font-size:.8rem;color:var(--text-2)">seit ${fmtDate(inj.startDate)} (${days}d)</span>
+        <div class="pm-actions">
+          <button class="pm-btn" data-action="injury-toggle" data-id="${p.id}" style="color:var(--green)">Fit melden</button>
+        </div>
+      </div>`}).join('')}`:''}
+    <div class="sec-heading">Spieler${healthy.length?' ('+healthy.length+')':''}</div>
+    ${healthy.map(p=>{
+      const pastInj=getInjuries(p.id).filter(inj=>inj.endDate);
+      return`<div class="pm-item">
+        <span class="pm-name">${esc(p.name)}</span>
+        ${pastInj.length?`<span style="font-size:.75rem;color:var(--text-3)">${pastInj.length}× verletzt</span>`:''}
+        <div class="pm-actions">
+          <button class="pm-btn" data-action="injury-toggle" data-id="${p.id}" style="color:var(--red)">Verletzung</button>
+        </div>
+      </div>`}).join('')}
+  </div>`}
+
 /* ── Monthly Bonus ── */
 function bonusHtml(){
-  const d=monthlyBonusData();
+  /* Verfügbare Monate für Filter */
+  const months=activeMonths();
+  const defaultMonth=months.includes(monthStr())?monthStr():(months[0]||monthStr());
+  const selMonth=tBonusMonth||defaultMonth;
+  const d=monthlyBonusData(selMonth);
   const qualNotDone=d.players.filter(p=>p.qualifies&&!p.done);
+  const qualified=d.players.filter(p=>p.qualifies);
+  const isCurrentMonth=selMonth===monthStr();
   /* Check if previous month bonus was already awarded */
   const prevMs=prevMonthStr();
   const prevD=monthlyBonusData(prevMs);
@@ -1268,30 +1595,215 @@ function bonusHtml(){
   return`${subHdr('Monatsbonus')}
   <div class="sub-content">
     <div class="info-card">
-      <h3>${d.month} – ${d.total} Trainingseinheiten</h3>
-      <p style="font-size:.85rem;color:var(--text-2);margin:0">Spieler mit ≥75% Anwesenheit erhalten +${rulePts('Monatsbonus',3)} Punkte (automatisch zum Monatswechsel)</p>
+      <p style="font-size:.85rem;color:var(--text-2);margin:0">Spieler mit ≥${Math.round(bonusThreshold()*100)}% Anwesenheit erhalten +${rulePts('Monatsbonus',3)} Punkte (automatisch zum Monatswechsel)</p>
     </div>
-    ${!d.total?`<div class="empty"><p>Noch keine Anwesenheitsdaten für diesen Monat.</p></div>`:`
-    <div class="sec-heading">Spieler</div>
-    ${d.players.sort((a,b)=>b.rate-a.rate).map(p=>`
-      <div class="bonus-item ${p.qualifies?'qualifies':'not-qual'}">
+    <div class="form-group">
+      <select class="form-select" data-change="bonus-month">
+        ${months.map(ms=>{const[y,m]=ms.split('-');return`<option value="${ms}" ${ms===selMonth?'selected':''}>${MONTHS[parseInt(m,10)-1]} ${y}</option>`}).join('')}
+      </select>
+    </div>
+    <h3 style="margin:10px 0 6px;font-size:1rem">${d.month} – ${d.total} Trainingseinheiten</h3>
+    ${!d.total?`<div class="empty"><p>Keine Anwesenheitsdaten für diesen Monat.</p></div>`:`
+    ${qualified.length?`<div class="sec-heading">Bonus erreicht (${qualified.length})</div>
+    ${qualified.sort((a,b)=>b.rate-a.rate).map(p=>`
+      <div class="bonus-item qualifies">
         <span class="pitem-name">${esc(p.name)}</span>
-        <span class="bonus-pct" style="color:${p.qualifies?'var(--green)':'var(--red)'}">${Math.round(p.rate*100)}%</span>
+        <span class="bonus-pct" style="color:var(--green)">${Math.round(p.rate*100)}%</span>
         <span style="font-size:.75rem;color:var(--text-2)">${p.att}/${p.total}</span>
         ${p.done?'<span class="bonus-done">Erhalten</span>':''}
-      </div>`).join('')}
+      </div>`).join('')}`:''}
+    ${(()=>{const notQual=d.players.filter(p=>!p.qualifies);
+      return notQual.length?`<div class="sec-heading">Nicht erreicht (${notQual.length})</div>
+      ${notQual.sort((a,b)=>b.rate-a.rate).map(p=>`
+        <div class="bonus-item not-qual">
+          <span class="pitem-name">${esc(p.name)}</span>
+          <span class="bonus-pct" style="color:var(--red)">${Math.round(p.rate*100)}%</span>
+          <span style="font-size:.75rem;color:var(--text-2)">${p.att}/${p.total}</span>
+          ${p.done?'<span class="bonus-done">Erhalten</span>':''}
+        </div>`).join('')}`:'';})()}
     `}
-    ${prevQualNotDone.length?`
+    ${prevQualNotDone.length&&isCurrentMonth?`
     <div class="info-card mt-2" style="border-left:3px solid var(--gold)">
       <h3>${prevD.month} – Bonus noch nicht vergeben</h3>
-      <p style="font-size:.85rem;color:var(--text-2);margin:0 0 10px">${prevQualNotDone.length} Spieler qualifiziert (≥75%)</p>
+      <p style="font-size:.85rem;color:var(--text-2);margin:0 0 10px">${prevQualNotDone.length} Spieler qualifiziert (≥${Math.round(bonusThreshold()*100)}%)</p>
       <button class="btn btn-success btn-sm" data-action="save-bonus-prev">Bonus ${prevD.month} jetzt vergeben</button>
     </div>`:''}
   </div>
-  ${qualNotDone.length?`<div class="sub-footer">
+  ${qualNotDone.length&&isCurrentMonth?`<div class="sub-footer">
     <button class="btn btn-success btn-block" data-action="save-bonus">
       Bonus an ${qualNotDone.length} Spieler vergeben (+${rulePts('Monatsbonus',3)})</button>
   </div>`:''}`}
+
+/* ── Season ── */
+function seasonHtml(){
+  const active=seasonActive();
+  const daysLeft=seasonDaysLeft();
+  const warn4w=daysLeft!==null&&daysLeft<=28&&daysLeft>0;
+  /* Preview awards for active season */
+  const previewAwards=active?calcSeasonAwards(S.season.startDate,S.season.endDate):[];
+  /* End-season confirmation */
+  if(tSeasonConfirm){
+    const awards=tSeasonConfirm.awards||[];
+    const seasonEntries=S.entries.filter(e=>e.date>=tSeasonConfirm.startDate&&e.date<=tSeasonConfirm.endDate);
+    const trainingDays=new Set(seasonEntries.filter(e=>e.category==='Anwesenheit').map(e=>e.date)).size;
+    const lowData=trainingDays<5;
+    return`${subHdr('Saison beenden')}
+    <div class="sub-content">
+      <div class="injury-confirm">
+        <h3>Saison „${esc(tSeasonConfirm.name)}" beenden?</h3>
+        <p style="font-size:.85rem;margin:0 0 12px">Zeitraum: ${fmtDateShort(tSeasonConfirm.startDate)} – ${fmtDateShort(tSeasonConfirm.endDate)} · ${trainingDays} Trainingstag${trainingDays!==1?'e':''}</p>
+        ${lowData?`<div class="info-card" style="background:var(--red-s);border-color:var(--red);margin-bottom:12px">
+          <p style="font-size:.85rem;color:var(--red);margin:0;font-weight:600">⚠️ Wenig Daten – nur ${trainingDays} Trainingstag${trainingDays!==1?'e':''}. Awards sind möglicherweise nicht aussagekräftig.</p></div>`:''}
+        ${awards.length?`<div style="margin-bottom:12px">${awards.map(a=>`<div style="display:flex;align-items:center;gap:8px;padding:4px 0;font-size:.85rem">
+          <span style="font-size:1.1rem">${a.badge}</span><span><b>${esc(a.name)}</b> – ${esc(a.label)} (${esc(a.value)})</span></div>`).join('')}</div>`
+          :'<p style="font-size:.85rem;color:var(--text-2)">Keine Awards berechenbar.</p>'}
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-primary" data-action="confirm-end-season">Saison beenden & Awards speichern</button>
+          <button class="btn btn-secondary" data-action="cancel-end-season">Abbrechen</button>
+        </div>
+      </div>
+    </div>`}
+  return`${subHdr('Saison')}
+  <div class="sub-content">
+    ${active?`
+      <div class="info-card">
+        <h3>${esc(S.season.name||'Aktuelle Saison')}</h3>
+        <p style="font-size:.85rem;color:var(--text-2);margin:4px 0">${fmtDateShort(S.season.startDate)} – ${fmtDateShort(S.season.endDate)}</p>
+        <p style="font-size:.9rem;margin:8px 0;font-weight:600;color:${warn4w?'var(--red)':'var(--text)'}">
+          ${daysLeft===0?'Saison endet heute!':daysLeft>0?`Noch ${daysLeft} Tag${daysLeft!==1?'e':''}`:'Saison ist abgelaufen'}
+          ${warn4w?' ⚠️ Weniger als 4 Wochen!':''}
+        </p>
+      </div>
+      ${previewAwards.length?`<div class="sec-heading">Aktuelle Auswertung (Vorschau)</div>
+      ${previewAwards.map(a=>`<div class="season-award-row"><span class="season-award-badge">${a.badge}</span>
+        <span class="season-award-info"><b>${esc(a.name)}</b><br><span style="font-size:.8rem;color:var(--text-2)">${esc(a.label)} – ${esc(a.value)}</span></span></div>`).join('')}`:''}
+      <button class="btn btn-secondary btn-block mt-2" data-action="end-season-start">Saison beenden</button>
+    `:`
+      <div class="sec-heading">Neue Saison starten</div>
+      <div class="form-group"><label class="form-label">Name (optional)</label><input class="form-input" data-change="season-name" value="${esc(tSeasonName)}"></div>
+      <div class="form-group"><label class="form-label">Startdatum</label><input type="date" class="form-input" data-change="season-start-date" value="${tSeasonStart||today()}"></div>
+      <div class="form-group"><label class="form-label">Enddatum</label><input type="date" class="form-input" data-change="season-end-date" value="${tSeasonEnd||''}"></div>
+      <button class="btn btn-primary btn-block mt-2" data-action="save-season" ${!tSeasonEnd?'disabled':''}>Saison starten</button>
+    `}
+    ${(S.pastSeasons||[]).length?`
+      <div class="sec-heading" style="margin-top:20px">Vergangene Saisons</div>
+      ${S.pastSeasons.slice().reverse().map(s=>`
+        <div class="season-past-card">
+          <div style="display:flex;justify-content:space-between;align-items:baseline">
+            <h4 style="margin:0;font-size:.9rem">${esc(s.name||'Saison')}</h4>
+            <span style="font-size:.75rem;color:var(--text-3)">${fmtDateShort(s.startDate)} – ${fmtDateShort(s.endDate)}</span>
+          </div>
+          ${(s.awards||[]).length?`<div style="margin-top:6px">${s.awards.map(a=>`<div style="display:flex;align-items:center;gap:6px;padding:2px 0;font-size:.82rem">
+            <span>${a.badge}</span><span>${esc(a.name)} – ${esc(a.label)}</span></div>`).join('')}</div>`:''}
+        </div>`).join('')}
+    `:''}
+  </div>`}
+
+function fmtDateShort(d){if(!d)return'';const p=d.split('-');return p[2]+'.'+p[1]+'.'+p[0].slice(2)}
+
+/* ── Table Image (Canvas PNG) ── */
+function renderTableImage(){
+  const players=activePlayers().map(p=>({...p,
+    points:pts(p.id),delta:weekDelta(p.id),att:attCount(p.id),streak:getStreak(p.id)}))
+    .sort((a,b)=>b.points-a.points||b.att-a.att).slice(0,10);
+  if(!players.length)return null;
+
+  const dpr=2;
+  const W=540,rowH=44,headerH=70,footerH=36,padX=20;
+  const tableTop=headerH;
+  const H=headerH+players.length*rowH+footerH;
+  const c=document.createElement('canvas');
+  c.width=W*dpr;c.height=H*dpr;
+  const ctx=c.getContext('2d');
+  ctx.scale(dpr,dpr);
+
+  /* Background */
+  ctx.fillStyle='#1A1410';ctx.fillRect(0,0,W,H);
+
+  /* Header */
+  const grad=ctx.createLinearGradient(0,0,W,0);
+  grad.addColorStop(0,'#6B3A2A');grad.addColorStop(1,'#5A2E1F');
+  ctx.fillStyle=grad;ctx.fillRect(0,0,W,headerH);
+  ctx.fillStyle='#fff';ctx.font='bold 22px Oswald, sans-serif';
+  ctx.fillText('Trainingsliga',padX,32);
+  ctx.font='400 13px Oswald, sans-serif';ctx.fillStyle='rgba(255,255,255,.7)';
+  const kw=isoWeek(new Date());
+  const dateStr=new Date().toLocaleDateString('de-DE',{day:'2-digit',month:'long',year:'numeric'});
+  ctx.fillText('FCSP Vierte  ·  KW '+kw+'  ·  '+dateStr,padX,52);
+
+  /* Column header */
+  const colRank=padX,colName=55,colPts=W-130,colChg=W-65;
+  ctx.fillStyle='rgba(255,255,255,.35)';ctx.font='600 11px Oswald, sans-serif';
+  ctx.fillText('#',colRank,tableTop-6);ctx.fillText('SPIELER',colName,tableTop-6);
+  ctx.fillText('PKT',colPts,tableTop-6);ctx.fillText('7 TAGE',colChg,tableTop-6);
+
+  /* Rows */
+  const medalColors=['#FFD700','#C0C0C0','#CD7F32'];
+  players.forEach((p,i)=>{
+    const y=tableTop+i*rowH;
+    /* Alternating row bg */
+    ctx.fillStyle=i%2===0?'rgba(255,255,255,.04)':'rgba(255,255,255,.02)';
+    ctx.fillRect(0,y,W,rowH);
+    /* Rank */
+    const rankY=y+rowH/2+5;
+    if(i<3){
+      ctx.fillStyle=medalColors[i];ctx.beginPath();ctx.arc(colRank+10,y+rowH/2,12,0,Math.PI*2);ctx.fill();
+      ctx.fillStyle='#1A1410';ctx.font='bold 14px Oswald, sans-serif';ctx.textAlign='center';
+      ctx.fillText(''+(i+1),colRank+10,rankY);ctx.textAlign='left';
+    }else{
+      ctx.fillStyle='rgba(255,255,255,.5)';ctx.font='bold 14px Oswald, sans-serif';
+      ctx.fillText(''+(i+1),colRank+4,rankY);
+    }
+    /* Name + badges */
+    ctx.fillStyle='#F0E8E0';ctx.font='400 15px "Source Sans 3", sans-serif';
+    let nameStr=p.name;
+    const badges=playerBadges(p.id);
+    const injStr=isInjured(p.id)?' ✚':'';
+    const streakStr=p.streak>=streakThreshold()?' 🔥'+p.streak:'';
+    const badgeStr=badges.length?' '+badges.join(''):'';
+    const fullName=nameStr+injStr+streakStr+badgeStr;
+    ctx.fillText(fullName,colName,rankY);
+    /* Points */
+    ctx.fillStyle='#F0E8E0';ctx.font='bold 16px Oswald, sans-serif';
+    ctx.fillText(''+p.points,colPts,rankY);
+    /* Delta */
+    const d=p.delta;
+    ctx.fillStyle=d>0?'#4ACD73':d<0?'#EF6B6B':'rgba(255,255,255,.3)';
+    ctx.font='600 13px Oswald, sans-serif';
+    const dTxt=d>0?'▲ +'+d:d<0?'▼ '+d:'▬ 0';
+    ctx.fillText(dTxt,colChg,rankY);
+    /* Bottom line */
+    ctx.fillStyle='rgba(255,255,255,.06)';ctx.fillRect(padX,y+rowH-1,W-2*padX,1);
+  });
+
+  /* Footer */
+  const fy=tableTop+players.length*rowH;
+  ctx.fillStyle='rgba(255,255,255,.25)';ctx.font='400 11px "Source Sans 3", sans-serif';
+  ctx.textAlign='center';
+  ctx.fillText('trainingsliga-fcsp-4 · Top '+players.length,W/2,fy+22);
+  ctx.textAlign='left';
+
+  return c;
+}
+
+async function shareOrDownloadTable(){
+  const c=renderTableImage();
+  if(!c){toast('Keine Spieler vorhanden','err');return}
+  /* Try Web Share API (mobile) */
+  if(navigator.canShare){
+    try{
+      const blob=await new Promise(r=>c.toBlob(r,'image/png'));
+      const file=new File([blob],'trainingsliga-top10.png',{type:'image/png'});
+      if(navigator.canShare({files:[file]})){
+        await navigator.share({files:[file],title:'Trainingsliga Top 10'});return}
+    }catch(e){if(e.name==='AbortError')return}
+  }
+  /* Fallback: download */
+  const link=document.createElement('a');
+  link.download='trainingsliga-top10.png';
+  link.href=c.toDataURL('image/png');
+  link.click();
+}
 
 /* ── Weekly Theme ── */
 function themeHtml(){
@@ -1531,7 +2043,8 @@ function openScreen(screen){
   tCat='fitness';tPts=1;tComment='';tCustomCat='';tSingleSel={};tNewName='';tEditId=null;tEditName='';
   tTheme='';tCustom='';tNewPin='';tConfPin='';tLogOpen={};
   tRuleEditId=null;tRuleTitle='';tRuleText='';tRulePts=null;tMsEditIdx=null;tMsValue='';tMsTitle='';tNewMsValue='';tNewMsTitle='';
-  tSearchFilter='';tLogLimit=20;tDeletePlayerId=null;
+  tSearchFilter='';tLogLimit=20;tDeletePlayerId=null;tInjuryPlayerId=null;tInjuryStart='';tInjuryEnd='';tInjuryConfirm=null;tBonusMonth='';
+  tSeasonStart='';tSeasonEnd='';tSeasonName='';tSeasonConfirm=null;
   R();window.scrollTo(0,0);
 }
 
@@ -1587,12 +2100,12 @@ app.addEventListener('click',e=>{
           list.push({pid:p.id,pts:finalPts,cat:'Anwesenheit',comment:useStreak?`Streak ${streak}`:''})}
       });
       if(!list.length){toast('Keine Spieler ausgewählt','err');break}
-      if(dupes.length){toast(`Achtung: ${dupes.length} Spieler haben bereits Anwesenheit für ${fmtDate(dateStr)}`,'err');
-        if(el.dataset.confirmed!=='1'){el.dataset.confirmed='1';
-          el.textContent='Trotzdem speichern?';setTimeout(()=>{el.textContent=`Anwesenheit speichern (${list.filter(e=>e.cat==='Anwesenheit').length})`;delete el.dataset.confirmed},3000);break}}
+      if(dupes.length&&el.dataset.confirmed!=='1'){toast(`Achtung: ${dupes.length} Spieler haben bereits Anwesenheit für ${fmtDate(dateStr)}`,'err');
+        el.dataset.confirmed='1';
+        el.textContent='Trotzdem speichern?';setTimeout(()=>{el.textContent=`Anwesenheit speichern (${list.filter(e=>e.cat==='Anwesenheit').length})`;delete el.dataset.confirmed},3000);break}
       addEntries(list);save();
       const streakMsg=streakCount?` (${streakCount}× Streak-Bonus)`:'';
-      toast(`${list.length} Einträge gespeichert${streakMsg}`);UI.screen=null;R();window.scrollTo(0,0);break}
+      undoToast(`${list.length} Einträge gespeichert${streakMsg}`);UI.screen=null;R();window.scrollTo(0,0);break}
 
     /* Game Result */
     case'set-team':{const id=el.dataset.id;tTeams[id]=el.dataset.team||null;R();break}
@@ -1625,7 +2138,7 @@ app.addEventListener('click',e=>{
           win.forEach(p=>list.push({pid:p.id,pts:finalPts,cat:'Sieg Abschlussspiel'}))
         }
       }
-      addEntries(list);save();toast(`${list.length} Punkte vergeben`);UI.screen=null;R();window.scrollTo(0,0);break}
+      addEntries(list);save();undoToast(`${list.length} Punkte vergeben`);UI.screen=null;R();window.scrollTo(0,0);break}
 
     /* Player of Training */
     case'sel-player':tSelPlayer=el.dataset.id;R();break;
@@ -1649,7 +2162,7 @@ app.addEventListener('click',e=>{
       const cat=MANUAL_CATS.find(c=>c.id===tCat);
       const catName=tCat==='other'&&tCustomCat.trim()?tCustomCat.trim():(cat?cat.name:'Sonstiges');
       const list=selected.map(p=>({pid:p.id,pts:tPts,cat:catName,comment:tComment}));
-      addEntries(list);save();toast(`${list.length} Einträge gespeichert`);UI.screen=null;R();window.scrollTo(0,0);break}
+      addEntries(list);save();undoToast(`${list.length} Einträge gespeichert`);UI.screen=null;R();window.scrollTo(0,0);break}
 
     /* Player Management */
     case'add-player':{
@@ -1688,14 +2201,62 @@ app.addEventListener('click',e=>{
       save();toast(`${name} gelöscht`);R();break}
     case'cancel-delete-player':tDeletePlayerId=null;R();break;
 
+    /* Injuries */
+    case'injury-toggle':{
+      const pid=el.dataset.id;
+      const actInj=getActiveInjury(pid);
+      tInjuryPlayerId=pid;
+      if(actInj){tInjuryEnd=today()}else{tInjuryStart=today()}
+      R();break}
+    case'cancel-injury-form':tInjuryPlayerId=null;tInjuryStart='';tInjuryEnd='';R();break;
+    case'save-injury':{
+      const pid=tInjuryPlayerId;
+      const startDate=tInjuryStart||today();
+      if(!pid){toast('Kein Spieler gewählt','err');break}
+      const inj={id:uid(),playerId:pid,startDate,endDate:null,createdAt:Date.now()};
+      if(!S.injuries)S.injuries=[];
+      S.injuries.push(inj);
+      const p=S.players.find(pl=>pl.id===pid);
+      tInjuryPlayerId=null;tInjuryStart='';
+      save();toast(`${p?p.name:'Spieler'} als verletzt markiert`);R();break}
+    case'end-injury':{
+      const injId=el.dataset.id;
+      const inj=(S.injuries||[]).find(i=>i.id===injId);
+      if(!inj){toast('Verletzung nicht gefunden','err');break}
+      const endDate=tInjuryEnd||today();
+      if(endDate<inj.startDate){toast('Ende kann nicht vor Beginn liegen','err');break}
+      inj.endDate=endDate;
+      tInjuryPlayerId=null;tInjuryEnd='';
+      /* Bestätigungsdialog für Punkte-Gutschrift */
+      tInjuryConfirm=inj;
+      save();R();break}
+    case'confirm-injury-credit':{
+      const injId=el.dataset.id;
+      const medPts=parseInt(el.dataset.pts);
+      const inj=(S.injuries||[]).find(i=>i.id===injId);
+      if(!inj||isNaN(medPts)){tInjuryConfirm=null;R();break}
+      if(medPts===0){tInjuryConfirm=null;save();toast('Verletzung beendet – Median war 0 Punkte');R();break}
+      S.entries.push({id:uid(),playerId:inj.playerId,points:medPts,category:'Verletzungsausgleich',
+        comment:`${fmtDate(inj.startDate)}–${fmtDate(inj.endDate)} (Median, ID:${inj.id})`,
+        date:inj.endDate,timestamp:Date.now(),batchId:uid()});
+      const p=S.players.find(pl=>pl.id===inj.playerId);
+      tInjuryConfirm=null;save();toast(`+${medPts} Punkte für ${p?p.name:'Spieler'} gutgeschrieben`);R();break}
+    case'skip-injury-credit':{tInjuryConfirm=null;save();toast('Verletzung beendet, keine Punkte gutgeschrieben');R();break}
+    case'cancel-injury-end':{
+      /* Verletzungsende rückgängig machen */
+      const injId=el.dataset.id;
+      const inj=(S.injuries||[]).find(i=>i.id===injId);
+      if(inj)inj.endDate=null;
+      tInjuryConfirm=null;save();R();break}
+
     /* Monthly Bonus */
     case'save-bonus':{
       const d=monthlyBonusData();
       const qual=d.players.filter(p=>p.qualifies&&!p.done);
       if(!qual.length){toast('Keine berechtigten Spieler','err');break}
       const bonusPts=rulePts('Monatsbonus',3);
-      const list=qual.map(p=>({pid:p.id,pts:bonusPts,cat:'Monatsbonus',comment:`${d.month} (≥75%)`}));
-      addEntries(list);save();toast(`Bonus an ${qual.length} Spieler vergeben`);R();break}
+      const list=qual.map(p=>({pid:p.id,pts:bonusPts,cat:'Monatsbonus',comment:`${d.month} (≥${Math.round(bonusThreshold()*100)}%)`}));
+      addEntries(list);save();undoToast(`Bonus an ${qual.length} Spieler vergeben`);R();break}
     case'save-bonus-prev':{
       const prevMs=prevMonthStr();
       const d=monthlyBonusData(prevMs);
@@ -1708,9 +2269,36 @@ app.addEventListener('click',e=>{
       const dateStr=lastDayPrev.toISOString().slice(0,10);
       qual.forEach(p=>{
         S.entries.push({id:uid(),playerId:p.id,points:bonusPts,category:'Monatsbonus',
-          comment:`${d.month} (≥75%)`,date:dateStr,timestamp:ts++,batchId:batch});
+          comment:`${d.month} (≥${Math.round(bonusThreshold()*100)}%)`,date:dateStr,timestamp:ts++,batchId:batch});
       });
       save();toast(`Bonus ${d.month} an ${qual.length} Spieler vergeben`);R();break}
+
+    /* Share Table Image */
+    case'share-table':{shareOrDownloadTable();break}
+
+    /* Season */
+    case'save-season':{
+      const name=tSeasonName.trim();
+      const start=tSeasonStart||today();
+      const end=tSeasonEnd;
+      if(!end){toast('Bitte Enddatum wählen','err');break}
+      if(end<=start){toast('Enddatum muss nach Startdatum liegen','err');break}
+      S.season={name:name||('Saison '+start.slice(0,4)),startDate:start,endDate:end};
+      save();toast('Saison gestartet!');R();break}
+    case'end-season-start':{
+      if(!seasonActive())break;
+      const awards=calcSeasonAwards(S.season.startDate,S.season.endDate);
+      tSeasonConfirm={name:S.season.name||'Saison',startDate:S.season.startDate,endDate:S.season.endDate,awards};
+      R();break}
+    case'confirm-end-season':{
+      if(!tSeasonConfirm)break;
+      const past={name:tSeasonConfirm.name,startDate:tSeasonConfirm.startDate,endDate:tSeasonConfirm.endDate,awards:tSeasonConfirm.awards,endedAt:Date.now()};
+      if(!S.pastSeasons)S.pastSeasons=[];
+      S.pastSeasons.push(past);
+      S.season=null;
+      tSeasonConfirm=null;
+      save();toast('Saison beendet – Awards gespeichert!');R();break}
+    case'cancel-end-season':{tSeasonConfirm=null;R();break}
 
     /* Weekly Theme */
     case'save-theme':{
@@ -1845,6 +2433,12 @@ app.addEventListener('change',e=>{
     case'new-ms-title':tNewMsTitle=el.value;break;
     case'search-filter':tSearchFilter=el.value;updateFilteredList();break;
     case'edit-entry-pts':tEditEntryPts=el.value;break;
+    case'injury-start-date':tInjuryStart=el.value;break;
+    case'injury-end-date':tInjuryEnd=el.value;break;
+    case'bonus-month':tBonusMonth=el.value;R();break;
+    case'season-start-date':tSeasonStart=el.value;R();break;
+    case'season-end-date':tSeasonEnd=el.value;R();break;
+    case'season-name':tSeasonName=el.value;break;
     case'month-filter':{const m=el.value;UI.monthFilter=m||null;UI.sort=m?null:'points';R();break}
     case'import-json':{
       const file=el.files?.[0];if(!file)break;
@@ -1931,6 +2525,19 @@ function toast(msg,type='ok'){
   wrap.appendChild(el);
   requestAnimationFrame(()=>requestAnimationFrame(()=>el.classList.add('show')));
   setTimeout(()=>{el.classList.remove('show');setTimeout(()=>el.remove(),300)},2200);
+}
+function undoToast(msg){
+  const wrap=document.getElementById('toast-wrap');
+  const el=document.createElement('div');
+  el.className='toast toast-ok toast-undo';
+  el.innerHTML=`<span>${esc(msg)}</span><button class="undo-btn">Rückgängig</button>`;
+  wrap.appendChild(el);
+  requestAnimationFrame(()=>requestAnimationFrame(()=>el.classList.add('show')));
+  let done=false;
+  const dismiss=()=>{if(done)return;done=true;el.classList.remove('show');setTimeout(()=>el.remove(),300)};
+  el.querySelector('.undo-btn').addEventListener('click',()=>{
+    const n=undoLast();if(n){save();toast(`${n} Einträge rückgängig gemacht`);R()}dismiss()});
+  setTimeout(dismiss,5000);
 }
 
 /* ═══════════════════════════ INIT ═══════════════════════════ */
