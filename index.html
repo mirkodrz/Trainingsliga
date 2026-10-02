@@ -970,8 +970,8 @@ function highlightsHtml(){
   const h=weekHighlights();
   if(!h.aufsteiger&&!h.sammler&&!h.streaks.length)return'';
   let cards='';
-  if(h.aufsteiger)cards+=`<div class="hl-card hl-aufsteiger" data-action="player-detail" data-id="${h.aufsteiger.id}"><span class="hl-icon">🚀</span><span class="hl-body"><span class="hl-label">Aufsteiger</span><span class="hl-val">${esc(h.aufsteiger.name)} <span class="hl-num positive">+${h.aufsteiger.delta}</span></span></span></div>`;
-  if(h.sammler)cards+=`<div class="hl-card hl-sammler" data-action="player-detail" data-id="${h.sammler.id}"><span class="hl-icon">💰</span><span class="hl-body"><span class="hl-label">Punktesammler</span><span class="hl-val">${esc(h.sammler.name)} <span class="hl-num positive">+${h.sammler.pts}</span></span></span></div>`;
+  if(h.aufsteiger)cards+=`<div class="hl-card hl-aufsteiger" data-action="player-detail" data-id="${h.aufsteiger.id}"><span class="hl-icon">🚀</span><span class="hl-body"><span class="hl-label">Aufsteiger (7 Tage)</span><span class="hl-val">${esc(h.aufsteiger.name)} <span class="hl-num positive">+${h.aufsteiger.delta}</span></span></span></div>`;
+  if(h.sammler)cards+=`<div class="hl-card hl-sammler" data-action="player-detail" data-id="${h.sammler.id}"><span class="hl-icon">💰</span><span class="hl-body"><span class="hl-label">Punktesammler (7 Tage)</span><span class="hl-val">${esc(h.sammler.name)} <span class="hl-num positive">+${h.sammler.pts}</span></span></span></div>`;
   if(h.streaks.length)cards+=`<div class="hl-card hl-streak"><span class="hl-icon">\u{1F525}</span><span class="hl-body"><span class="hl-label">Streak${h.streaks.length>1?'s':''}</span><span class="hl-val">${h.streaks.map(s=>`${esc(s.name)} (${s.streak})`).join(', ')}</span></span></div>`;
   return`<div class="hl-row slide-up">${cards}</div>`;
 }
