@@ -178,18 +178,22 @@ body{background:var(--bg);color:var(--text);font-family:var(--font-b);margin:0;p
 .ms-fill{height:100%;background:var(--gold);border-radius:2px;transition:width .4s ease}
 
 /* ── Milestone Progress (Player Detail) ── */
-.ms-progress{padding:0 0 8px}
-.ms-progress-bar{position:relative;height:6px;background:var(--border);border-radius:3px;margin:28px 0 28px}
-.ms-progress-fill{height:100%;background:linear-gradient(90deg,var(--gold),var(--gold-s) 50%,var(--gold));border-radius:3px;transition:width .5s ease}
-.ms-marker{position:absolute;top:50%;transform:translate(-50%,-50%);z-index:1}
-.ms-marker-dot{width:10px;height:10px;border-radius:50%;background:var(--border);border:2px solid var(--bg-alt);transition:background .3s}
-.ms-marker.done .ms-marker-dot{background:var(--gold);box-shadow:0 0 4px rgba(184,136,10,.3)}
-.ms-marker-label{position:absolute;left:50%;transform:translateX(-50%);font-size:.6rem;font-family:var(--font-d);
-  font-weight:600;white-space:nowrap;color:var(--text-3);text-transform:uppercase;letter-spacing:.03em}
-.ms-marker.ms-label-below .ms-marker-label{top:14px}
-.ms-marker.ms-label-above .ms-marker-label{bottom:14px}
-.ms-marker.done .ms-marker-label{color:var(--gold)}
-.ms-next-info{font-size:.82rem;color:var(--text-2);margin-top:2px}
+.ms-list{list-style:none;padding:0;margin:0}
+.ms-list-item{display:flex;align-items:center;gap:10px;padding:7px 0;position:relative}
+.ms-list-item:not(:last-child)::after{content:'';position:absolute;left:11px;top:28px;bottom:-7px;width:2px;background:var(--border)}
+.ms-list-item.done:not(:last-child)::after{background:var(--gold)}
+.ms-list-icon{width:22px;height:22px;border-radius:50%;border:2px solid var(--border);display:flex;align-items:center;
+  justify-content:center;font-size:.7rem;color:var(--text-3);flex-shrink:0;background:var(--card);z-index:1}
+.ms-list-item.done .ms-list-icon{border-color:var(--gold);background:var(--gold);color:#fff}
+.ms-list-item.next .ms-list-icon{border-color:var(--primary);color:var(--primary);border-style:dashed}
+.ms-list-body{flex:1;min-width:0}
+.ms-list-title{font-family:var(--font-d);font-size:.85rem;font-weight:600;color:var(--text-3)}
+.ms-list-item.done .ms-list-title{color:var(--gold)}
+.ms-list-item.next .ms-list-title{color:var(--text)}
+.ms-list-pts{font-size:.72rem;color:var(--text-3)}
+.ms-list-item.done .ms-list-pts{color:var(--gold);opacity:.7}
+.ms-list-item.next .ms-list-pts{color:var(--primary)}
+.ms-list-item.next .ms-list-remaining{font-size:.72rem;color:var(--primary);font-weight:600}
 
 /* ── Footer / Login ── */
 .footer-bar{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:520px;
@@ -1135,19 +1139,18 @@ function playerDetailHtml(){
       const reached=milestones.filter(m=>points>=msVal(m));
       const next=milestones.find(m=>points<msVal(m));
       return`<div class="sec-heading">Erfolge</div>
-      <div class="ms-progress">
-        <div class="ms-progress-bar">
-          <div class="ms-progress-fill" style="width:${Math.min(100,Math.round(points/barMax*100))}%"></div>
-          ${milestones.map((m,idx)=>{const v=msVal(m);const title=typeof m==='object'&&m.title?m.title:v+' Pkt';const left=Math.min(100,Math.round(v/barMax*100));const done=points>=v;
-            const pos=idx%2===0?'ms-label-below':'ms-label-above';
-            return`<div class="ms-marker${done?' done':''} ${pos}" style="left:${left}%" title="${title} (${v} Pkt)">
-              <div class="ms-marker-dot"></div>
-              <div class="ms-marker-label">${esc(title)}</div>
-            </div>`}).join('')}
-        </div>
-        ${next?`<div class="ms-next-info">Nächstes Ziel: <b>${typeof next==='object'&&next.title?esc(next.title):msVal(next)+' Punkte'}</b> – noch ${msVal(next)-points} Punkt${msVal(next)-points!==1?'e':''}</div>`
-          :`<div class="ms-next-info" style="color:var(--gold)">🏆 Alle Erfolge erreicht!</div>`}
-      </div>`;
+      <ul class="ms-list">
+        ${milestones.map(m=>{const v=msVal(m);const title=typeof m==='object'&&m.title?m.title:v+' Pkt';const done=points>=v;
+          const isNext=next&&m===next;const diff=v-points;
+          return`<li class="ms-list-item${done?' done':''}${isNext?' next':''}">
+            <div class="ms-list-icon">${done?'✓':'○'}</div>
+            <div class="ms-list-body">
+              <div class="ms-list-title">${esc(title)}</div>
+              <div class="ms-list-pts">${v} Punkte${isNext?` · <span class="ms-list-remaining">noch ${diff}</span>`:''}</div>
+            </div>
+          </li>`}).join('')}
+      </ul>
+      ${!next?`<div style="text-align:center;color:var(--gold);font-size:.85rem;font-weight:600;margin-top:6px">🏆 Alle Erfolge erreicht!</div>`:''}`;
     })()}
     <div class="sec-heading">Punktehistorie (${entries.length})</div>
     ${!entries.length?`<div class="empty" style="padding:20px"><p>Noch keine Einträge</p></div>`:`
