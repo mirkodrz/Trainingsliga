@@ -80,7 +80,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--font-b);margin:0;p
 .sort-btn{padding:5px 12px;border-radius:20px;border:1px solid var(--border);background:var(--card);
   font-size:.75rem;font-weight:600;color:var(--text-2);cursor:pointer;transition:all .15s;font-family:var(--font-b)}
 .sort-btn.active{background:var(--primary);color:#fff;border-color:var(--primary)}
-.month-select{margin-left:auto;padding:5px 24px 5px 10px;border-radius:20px;border:1px solid var(--border);background:var(--card);
+.month-select{padding:5px 24px 5px 10px;border-radius:20px;border:1px solid var(--border);background:var(--card);
   font-size:.75rem;font-weight:600;color:var(--text-2);font-family:var(--font-b);cursor:pointer;
   appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%23999'/%3E%3C/svg%3E");
   background-repeat:no-repeat;background-position:right 8px center;background-size:10px}
@@ -182,8 +182,9 @@ body{background:var(--bg);color:var(--text);font-family:var(--font-b);margin:0;p
 .ms-progress-bar{position:relative;height:6px;background:var(--border);border-radius:3px;margin:20px 0 28px}
 .ms-progress-fill{height:100%;background:linear-gradient(90deg,var(--gold),var(--gold-s) 50%,var(--gold));border-radius:3px;transition:width .5s ease}
 .ms-marker{position:absolute;top:50%;transform:translate(-50%,-50%);z-index:1}
-.ms-marker-dot{width:12px;height:12px;border-radius:50%;background:var(--border);border:2px solid var(--bg-alt);transition:background .3s}
-.ms-marker.done .ms-marker-dot{background:var(--gold);box-shadow:0 0 6px rgba(184,136,10,.4)}
+.ms-marker-dot{width:8px;height:8px;border-radius:50%;background:var(--border);border:2px solid var(--bg-alt);transition:background .3s}
+.ms-marker.done .ms-marker-dot{background:var(--gold);box-shadow:0 0 4px rgba(184,136,10,.3)}
+.ms-labeled .ms-marker-dot{width:12px;height:12px}
 .ms-marker-label{position:absolute;top:16px;left:50%;transform:translateX(-50%);font-size:.62rem;font-family:var(--font-d);
   font-weight:600;white-space:nowrap;color:var(--text-3);text-transform:uppercase;letter-spacing:.03em}
 .ms-marker.done .ms-marker-label{color:var(--gold)}
@@ -369,6 +370,7 @@ body{background:var(--bg);color:var(--text);font-family:var(--font-b);margin:0;p
   text-transform:uppercase;letter-spacing:.02em}
 .cat-pos{background:var(--green-s);color:var(--green)}
 .cat-neg{background:var(--red-s);color:var(--red)}
+.cat-neutral{background:var(--bg-alt);color:var(--text-2)}
 
 /* ── Bonus list ── */
 .bonus-item{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--card);
@@ -1136,9 +1138,12 @@ function playerDetailHtml(){
         <div class="ms-progress-bar">
           <div class="ms-progress-fill" style="width:${Math.min(100,Math.round(points/barMax*100))}%"></div>
           ${milestones.map(m=>{const v=msVal(m);const title=typeof m==='object'&&m.title?m.title:v+' Pkt';const left=Math.min(100,Math.round(v/barMax*100));const done=points>=v;
-            return`<div class="ms-marker${done?' done':''}" style="left:${left}%" title="${title} (${v} Pkt)">
+            const isLastReached=reached.length&&m===reached[reached.length-1];
+            const isNext=next&&m===next;
+            const showLabel=isLastReached||isNext;
+            return`<div class="ms-marker${done?' done':''}${showLabel?' ms-labeled':''}" style="left:${left}%" title="${title} (${v} Pkt)">
               <div class="ms-marker-dot"></div>
-              <div class="ms-marker-label">${esc(title)}</div>
+              ${showLabel?`<div class="ms-marker-label">${esc(title)} ${isLastReached?'✅':'⏳'}</div>`:''}
             </div>`}).join('')}
         </div>
         ${next?`<div class="ms-next-info">Nächstes Ziel: <b>${typeof next==='object'&&next.title?esc(next.title):msVal(next)+' Punkte'}</b> – noch ${msVal(next)-points} Punkt${msVal(next)-points!==1?'e':''}</div>`
@@ -1844,11 +1849,16 @@ function ruleEditorHtml(){
       <label class="form-label">Beschreibung</label>
       <input type="text" class="form-input" value="${esc(tRuleText)}" id="rule-text" data-change="rule-text" placeholder="z.B. +1 Punkt für Teilnahme">
     </div>
-    ${tRulePts!==null?`<div class="form-group">
-      <label class="form-label">Punkte pro Vergabe</label>
+    ${tRulePts!==null?(()=>{
+      const isBonus=tRuleEditId==='r_bonus_thr';
+      const isStreak=tRuleEditId==='r_streak_thr';
+      const label=isBonus?'Schwelle (%)':isStreak?'Anzahl Trainings':'Punkte pro Vergabe';
+      const hint=isBonus?'Mindest-Anwesenheitsquote für den Monatsbonus.':isStreak?'Anzahl Trainings in Folge, ab der der Streak-Bonus greift.':'Dieser Wert wird bei der Punktevergabe verwendet.';
+      return`<div class="form-group">
+      <label class="form-label">${label}</label>
       <input type="number" class="form-input" value="${tRulePts}" id="rule-pts" data-change="rule-pts" min="0" style="width:100px">
-      <span style="font-size:.75rem;color:var(--text-2);margin-top:4px;display:block">Dieser Wert wird bei der Punktevergabe verwendet.</span>
-    </div>`:''}
+      <span style="font-size:.75rem;color:var(--text-2);margin-top:4px;display:block">${hint}</span>
+    </div>`})():''}
     <div class="btn-group">
       <button type="button" class="btn btn-primary btn-sm" data-action="save-rule" ${!tRuleTitle.trim()||!tRuleText.trim()?'disabled':''}>Speichern</button>
       <button type="button" class="btn btn-secondary btn-sm" data-action="cancel-rule">Abbrechen</button>
@@ -1865,7 +1875,7 @@ function editRulesHtml(){
       return (isEditing?ruleEditorHtml():'') + `
     <div class="rule-card ${ruleClass(r)} slide-up" ${isEditing?'style="opacity:.5;pointer-events:none"':''}>
       <div class="flex-between">
-        <div style="flex:1"><div class="rule-title">${esc(r.title)}${typeof r.pts==='number'?` <span class="cat-badge cat-pos" style="font-size:.65rem;vertical-align:middle">${r.pts>0?'+':''}${r.pts} Pkt</span>`:''}</div>
+        <div style="flex:1"><div class="rule-title">${esc(r.title)}${typeof r.pts==='number'?` <span class="cat-badge ${r.id==='r_bonus_thr'||r.id==='r_streak_thr'?'cat-neutral':'cat-pos'}" style="font-size:.65rem;vertical-align:middle">${r.id==='r_bonus_thr'?'≥'+r.pts+'%':r.id==='r_streak_thr'?r.pts+'× in Folge':(r.pts>0?'+':'')+r.pts+' Pkt'}</span>`:''}</div>
         <div class="rule-text">${esc(r.text)}</div></div>
         <div class="pm-actions">
           <button class="pm-btn" data-action="edit-rule" data-idx="${i}">Bearb.</button>
