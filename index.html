@@ -120,8 +120,8 @@ body{background:var(--bg);color:var(--text);font-family:var(--font-b);margin:0;p
 
 /* ── Season ── */
 .season-banner{display:flex;justify-content:space-between;align-items:center;padding:8px 14px;
-  background:var(--primary-s);border-left:3px solid var(--primary);font-size:.82rem}
-.season-banner.warn{background:var(--red-s);border-left-color:var(--red)}
+  background:var(--primary-s);border-radius:8px;font-size:.82rem}
+.season-banner.warn{background:var(--red-s)}
 .season-banner-name{font-weight:600;font-family:var(--font-d)}
 .season-banner-info{color:var(--text-2);font-size:.78rem}
 .season-banner.warn .season-banner-info{color:var(--red);font-weight:600}
@@ -952,7 +952,7 @@ function playerViewHtml(){
     </div>
   </div>
   ${S.weeklyTheme&&!tDetailPlayer?`<div class="theme-banner"><span class="theme-label">Wochenthema</span><span class="theme-value">${esc(S.weeklyTheme)}</span></div>`:''}
-  ${seasonActive()&&!tDetailPlayer?(()=>{const dl=seasonDaysLeft();const warn=dl!==null&&dl<=28&&dl>0;const ended=dl===0;return`<div class="season-banner${warn||ended?' warn':''}"><span class="season-banner-name">${esc(S.season.name||'Saison')}</span><span class="season-banner-info">${ended?'Endet heute!':dl!==null?dl+' Tag'+(dl!==1?'e':'')+' verbleibend':''}</span></div>`})():''}
+  ${seasonActive()&&!tDetailPlayer?(()=>{const dl=seasonDaysLeft();const warn=dl!==null&&dl<=28&&dl>0;const ended=dl===0;const dateRange=fmtDateShort(S.season.startDate)+' – '+fmtDateShort(S.season.endDate);return`<div class="season-banner${warn||ended?' warn':''}"><span class="season-banner-name">${esc(S.season.name||'Saison')} · <span style="font-weight:400;font-family:var(--font)">${dateRange}</span></span><span class="season-banner-info">${ended?'Endet heute!':dl!==null?dl+' Tag'+(dl!==1?'e':'')+' verbleibend':''}</span></div>`})():''}
   ${tDetailPlayer?'':`<div class="tab-bar">
     <button class="tab-btn ${UI.tab==='table'?'active':''}" data-action="tab" data-tab="table">Tabelle</button>
     <button class="tab-btn ${UI.tab==='feed'?'active':''}" data-action="tab" data-tab="feed">Aktivitäten</button>
