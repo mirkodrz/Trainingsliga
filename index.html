@@ -1169,6 +1169,7 @@ function playerDetailHtml(){
         <div style="display:flex;align-items:center;gap:4px">
           <input type="number" class="form-input" value="${tEditEntryPts}" data-change="edit-entry-pts" style="width:70px;padding:4px 6px;font-size:.9rem;text-align:center;font-family:var(--font-d);font-weight:700">
           <button class="btn btn-primary btn-sm" data-action="save-entry-edit" data-id="${e.id}" style="padding:4px 8px">OK</button>
+          <button class="btn btn-sm" data-action="delete-entry" data-id="${e.id}" style="padding:4px 8px;background:var(--red);color:#fff">🗑</button>
           <button class="btn btn-secondary btn-sm" data-action="cancel-entry-edit" style="padding:4px 8px">✕</button>
         </div>
       </div>`:`<div class="pd-entry slide-up">
@@ -2082,6 +2083,12 @@ app.addEventListener('click',e=>{
       if(isNaN(newPts)){toast('Ungültiger Wert','err');break}
       const entry=S.entries.find(e=>e.id===eid);
       if(entry){entry.points=newPts;tEditEntryId=null;save();toast('Punkte aktualisiert');R()}
+      break;
+    }
+    case'delete-entry':{
+      const eid=el.dataset.id;
+      const idx=S.entries.findIndex(e=>e.id===eid);
+      if(idx>=0){S.entries.splice(idx,1);tEditEntryId=null;save();toast('Eintrag gelöscht');R()}
       break;
     }
     case'sort':UI.sort=el.dataset.sort;UI.monthFilter=null;R();break;
