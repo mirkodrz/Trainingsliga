@@ -604,8 +604,8 @@ function relDate(ds){const now=new Date();now.setHours(0,0,0,0);const[y,m,d]=ds.
 function fmtTime(ts){const d=new Date(ts);return`${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`}
 function monthStr(d){const dt=d||new Date();return`${dt.getFullYear()}-${String(dt.getMonth()+1).padStart(2,'0')}`}
 function monthName(d){return MONTHS[(d||new Date()).getMonth()]}
-function prevMonthStr(){const now=new Date();now.setMonth(now.getMonth()-1);return monthStr(now)}
-function prevMonthName(){const now=new Date();now.setMonth(now.getMonth()-1);return monthName(now)}
+function prevMonthStr(){const now=new Date();now.setDate(1);now.setMonth(now.getMonth()-1);return monthStr(now)}
+function prevMonthName(){const now=new Date();now.setDate(1);now.setMonth(now.getMonth()-1);return monthName(now)}
 
 /* ═══════════════════════════ QUERIES ═══════════════════════════ */
 function activePlayers(){return S.players.filter(p=>p.active)}
@@ -820,9 +820,13 @@ function monthlyBonusData(ms){
   return{total,month:mName,monthKey,players:pdata}}
 
 /* ── Auto Monthly Bonus ── */
-function checkAutoMonthlyBonus(){
+let autoBonusRan=false;
+async function checkAutoMonthlyBonus(){
   /* Wird beim App-Start aufgerufen. Prüft ob der Vormonat abgeschlossen ist
-     und vergibt automatisch den Monatsbonus für qualifizierte Spieler. */
+     und vergibt automatisch den Monatsbonus für qualifizierte Spieler.
+     Läuft nur einmal pro Session (Guard-Variable). */
+  if(autoBonusRan)return;
+  autoBonusRan=true;
   const prevMs=prevMonthStr();
   const d=monthlyBonusData(prevMs);
   if(!d.total)return; /* Keine Trainings im Vormonat */
@@ -838,7 +842,7 @@ function checkAutoMonthlyBonus(){
     S.entries.push({id:uid(),playerId:p.id,points:bonusPts,category:'Monatsbonus',
       comment:`${d.month} (≥${Math.round(bonusThreshold()*100)}% – automatisch)`,date:dateStr,timestamp:ts++,batchId:batch});
   });
-  save();
+  await save();
   setTimeout(()=>toast(`Monatsbonus ${d.month}: ${qualNotDone.length} Spieler automatisch erhalten`,'info'),1000);
 }
 
@@ -2558,7 +2562,7 @@ function undoToast(msg){
   await load();
   R();
   /* Auto-Monatsbonus: Prüfe beim Start ob Vormonats-Bonus vergeben werden muss */
-  checkAutoMonthlyBonus();
+  await checkAutoMonthlyBonus();
 })();
 </script>
 </body>
