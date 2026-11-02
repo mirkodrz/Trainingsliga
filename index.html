@@ -1121,6 +1121,7 @@ function rankChartHtml(pid){
   if(!weeks.length)return'';
 
   /* Pro KW: Ranking für alle Spieler berechnen */
+  const totalWeeks=weeks.length;
   const weekData=[];
   const todayStr=now.toISOString().slice(0,10);
   let todayWeekIdx=-1;
@@ -1132,7 +1133,7 @@ function rankChartHtml(pid){
       const ranked=ap.map(p=>({id:p.id,p:ptsAsOf(p.id,ts),a:attCountAsOf(p.id,ts)}))
         .sort((a,b)=>b.p-a.p||b.a-a.a);
       const rank=ranked.findIndex(r=>r.id===pid)+1;
-      weekData.push({label:'KW '+isoWeek(wEnd),rank:rank||totalPlayers,date:wDateStr});
+      weekData.push({wi,label:'KW '+isoWeek(wEnd),rank:rank||totalPlayers,date:wDateStr});
       if(isPast)todayWeekIdx=weekData.length-1;
     }
   });
@@ -1144,7 +1145,8 @@ function rankChartHtml(pid){
   const chartW=W-padL-padR, chartH=H-padT-padB;
   const maxRank=totalPlayers, minRank=1;
   const yOf=r=>padT+((r-minRank)/(maxRank-minRank))*chartH;
-  const xOf=i=>padL+(i/(weekData.length-1))*chartW;
+  /* X-Position basiert auf Gesamt-Saisonwochen, nicht nur Datenpunkten */
+  const xOf=wi=>padL+(wi/(totalWeeks-1))*chartW;
 
   const cs=getComputedStyle(document.documentElement);
   const green=cs.getPropertyValue('--green').trim();
@@ -1173,17 +1175,19 @@ function rankChartHtml(pid){
   svg+=`<text x="${padL}" y="${H-5}" text-anchor="start" fill="${text3}" font-size="11" font-family="Oswald,sans-serif">${fmtShort(sd)}</text>`;
   svg+=`<text x="${W-padR}" y="${H-5}" text-anchor="end" fill="${text3}" font-size="11" font-family="Oswald,sans-serif">${fmtShort(ed)}</text>`;
 
-  /* Heute-Linie */
-  if(todayWeekIdx>=0&&todayWeekIdx<weekData.length-1){
-    const tx=xOf(todayWeekIdx);
+  /* Heute-Linie: zeigen wenn Saison noch nicht zu Ende */
+  const lastData=weekData[todayWeekIdx>=0?todayWeekIdx:weekData.length-1];
+  const lastWi=lastData.wi;
+  if(todayWeekIdx>=0&&lastWi<totalWeeks-1){
+    const tx=xOf(lastWi);
     svg+=`<line x1="${tx}" y1="${padT}" x2="${tx}" y2="${H-padB}" stroke="${text3}" stroke-width="1" stroke-dasharray="3,3" opacity="0.7"/>`;
     svg+=`<text x="${tx}" y="${padT-5}" text-anchor="middle" fill="${text3}" font-size="10" font-family="Oswald,sans-serif">Heute</text>`;
   }
 
   /* Linien-Segmente: Grün bei Aufstieg, Rot bei Abstieg */
   for(let i=0;i<weekData.length-1;i++){
-    const x1=xOf(i),y1=yOf(weekData[i].rank);
-    const x2=xOf(i+1),y2=yOf(weekData[i+1].rank);
+    const x1=xOf(weekData[i].wi),y1=yOf(weekData[i].rank);
+    const x2=xOf(weekData[i+1].wi),y2=yOf(weekData[i+1].rank);
     const improving=weekData[i+1].rank<weekData[i].rank;
     const same=weekData[i+1].rank===weekData[i].rank;
     const color=same?text2:(improving?green:red);
@@ -1192,19 +1196,18 @@ function rankChartHtml(pid){
   }
 
   /* Datenpunkte */
-  weekData.forEach((w,i)=>{
-    const x=xOf(i),y=yOf(w.rank);
+  weekData.forEach(w=>{
+    const x=xOf(w.wi),y=yOf(w.rank);
     svg+=`<circle cx="${x}" cy="${y}" r="4.5" fill="${card}" stroke="${primary}" stroke-width="1.5"/>`;
   });
 
   /* Aktuelle Platzierung hervorheben */
-  const last=weekData[todayWeekIdx>=0?todayWeekIdx:weekData.length-1];
-  const li=todayWeekIdx>=0?todayWeekIdx:weekData.length-1;
-  const lx=xOf(li),ly=yOf(last.rank);
+  const lx=xOf(lastWi),ly=yOf(lastData.rank);
   svg+=`<circle cx="${lx}" cy="${ly}" r="6" fill="${primary}" stroke="${card}" stroke-width="2"/>`;
-  const labelX=li>weekData.length*0.8?lx-11:lx+11;
-  const anchor=li>weekData.length*0.8?'end':'start';
-  svg+=`<text x="${labelX}" y="${ly+5}" text-anchor="${anchor}" fill="${primary}" font-size="13" font-weight="700" font-family="Oswald,sans-serif">#${last.rank}</text>`;
+  const labelRight=lastWi>totalWeeks*0.8;
+  const labelX=labelRight?lx-11:lx+11;
+  const anchor=labelRight?'end':'start';
+  svg+=`<text x="${labelX}" y="${ly+5}" text-anchor="${anchor}" fill="${primary}" font-size="13" font-weight="700" font-family="Oswald,sans-serif">#${lastData.rank}</text>`;
 
   svg+=`</svg>`;
 
